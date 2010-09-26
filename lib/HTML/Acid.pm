@@ -9,6 +9,9 @@ use version; our $VERSION = qv('0.0.1');
 
 # Module implementation here
 
+# Buffers
+my $out = "";
+
 sub new {
     my $class = shift;
     my $self = HTML::Parser->new;
@@ -18,7 +21,10 @@ sub new {
 
 sub burn {
     my $self = shift;
-    return "";
+    my $text = shift;
+    $self->parse($text);
+    $self->eof;
+    return $out;
 }
 
 1; # Magic true value required at end of module

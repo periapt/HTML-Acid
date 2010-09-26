@@ -10,6 +10,7 @@ my $builder = Module::Build->new(
     build_requires => {
         'Test::More' => 0,
         'Perl6::Slurp' => 0,
+        'Readonly'=>0,
     },
     requires => {
         'version'    => 0,
