@@ -21,7 +21,7 @@ __END__
 
 =head1 NAME
 
-HTML::Acid - Reformat HTML fragment to strict crteria
+HTML::Acid - Reformat HTML fragment to strict criteria
 
 =head1 VERSION
 
@@ -38,7 +38,7 @@ This document describes HTML::Acid version 0.0.1
 Fragments of HTML returned by a rich text editor tend to be not entirely
 standards compliant. C<img> tags tend not to be closed. Paragraphs breaks 
 might be represented by double C<br> tags rather than C<p> tags. Of course
-we also need to do all the XSS avoidence an HTML clean up routine would,
+we also need to do all the XSS avoidance an HTML clean up routine would,
 such as controlling C<href> tags, removing javascript and inline styling.
 
 So this module, given a fragment of HTML, will rewrite it into a very
@@ -87,7 +87,7 @@ alone.
 =item I<external_regex>
 
 This is a regular expression that controls what C<href> and C<src> tags
-are permitted. It defaults to an expresion that restricts access to internal
+are permitted. It defaults to an expression that restricts access to internal
 absolute paths with an optional sub-reference.
 
 =item I<other_tags>
