@@ -21,39 +21,86 @@ __END__
 
 =head1 NAME
 
-HTML::Acid - [One line description of module's purpose here]
-
+HTML::Acid - Reformat HTML fragment to strict crteria
 
 =head1 VERSION
 
 This document describes HTML::Acid version 0.0.1
 
-
 =head1 SYNOPSIS
 
     use HTML::Acid;
-
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-  
+    my $acid = HTML::Acid->new;
+    return $acid->burn($html)
   
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
+Fragments of HTML returned by a rich text editor tend to be not entirely
+standards compliant. C<img> tags tend not to be closed. Paragraphs breaks 
+might be represented by double C<br> tags rather than C<p> tags. Of course
+we also need to do all the XSS avoidence an HTML clean up routine would,
+such as controlling C<href> tags, removing javascript and inline styling.
 
+So this module, given a fragment of HTML, will rewrite it into a very
+restricted subset of XHTML.
+
+=over
+
+=item * In this dialect, documents consist entirely of C<p> elements and
+C<h1-6> elements.
+
+=item * Every header will have C<id> attribute automatically generated
+from the header contents.
+
+=item * Every paragraph may consist of text, C<a> elements, C<img> elements
+and other elements decided by the configuration.
+
+=item * Anchors must have an C<href> attribute matching a regular
+expression set in the configuration. By default C<href>s are required to be
+internal. They may also have a C<title> attribute.
+
+=item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
+attributes. The C<src> attribute must match the same regular expression
+as C<href>.
+
+=item * All other tags must have no attributes and may only contain text.
+
+=item * Double C<br> elements in the source will be interpreted as paragraph
+breaks.
+
+=back
 
 =head1 INTERFACE 
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+=head2 new
 
+This constructor takes three named parameters.
+
+=over 
+
+=item I<allowed_headers>
+
+This is an array reference of tag names that indicates which elements
+will be allowed as headers within the fragment. It defaults to C<h3> 
+alone.
+
+=item I<external_regex>
+
+This is a regular expression that controls what C<href> and C<src> tags
+are permitted. It defaults to an expresion that restricts access to internal
+absolute paths with an optional sub-reference.
+
+=item I<other_tags>
+
+This is an array reference to a list of additional tags that might be 
+permitted inside paragraphs. It defaults to C<em> and C<strong>.
+
+=back
+
+=head2 burn
+
+This method takes the input HTML as an input and returns the cleaned
+up HTML.
 
 =head1 DIAGNOSTICS
 
@@ -80,49 +127,17 @@ This document describes HTML::Acid version 0.0.1
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-=for author to fill in:
-    A full explanation of any configuration system(s) used by the
-    module, including the names and locations of any configuration
-    files, and the meaning of any environment variables or properties
-    that can be set. These descriptions must also include details of any
-    configuration language used.
-  
 HTML::Acid requires no configuration files or environment variables.
-
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-None.
-
+This module works by subclassing L<HTML::Parser>.
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -130,11 +145,17 @@ Please report any bugs or feature requests to
 C<bug-html-acid@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
+=head1 SEE ALSO
+
+There are many other modules that do something similar. Of those I think
+the most complete is L<HTML::StriptScripts::Parser>. You can also see
+L<HTML::Declaw>, L<HTML::Clean>, L<HTML::Defang>, L<HTML::Restrict>,
+L<HTML::Scrubber>, L<HTML::Laundary>, L<HTML::Detoxifier>, L<Marpa::HTML>,
+L<HTML::Tidy>. People also often refer to HTML::Santitizer.
 
 =head1 AUTHOR
 
 Nicholas Bamber  C<< <nicholas@periapt.co.uk> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
