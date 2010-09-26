@@ -9,10 +9,13 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/HTML/Acid.pm',
     build_requires => {
         'Test::More' => 0,
+        'Perl6::Slurp' => 0,
     },
     requires => {
         'version'    => 0,
+        'HTML::Parser' => 0,
     },
+    create_readme=>1,
     create_makefile_pl => 'traditional',
     add_to_cleanup      => [ 'HTML-Acid-*' ],
 );
