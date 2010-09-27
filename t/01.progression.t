@@ -3,6 +3,7 @@ use warnings;
 use Carp;
 use Test::More;
 use Test::NoWarnings;
+use Test::Differences;
 use HTML::Acid;
 use Readonly;
 use File::Basename;
@@ -24,7 +25,7 @@ foreach my $input_file (@INPUT_FILES) {
         my $basename = basename $input_file;
         my $expected = slurp "t/out/$basename";
         my $actual = $acid->burn($input);
-        is ($actual, $expected, "expected $input_file");
+        eq_or_diff($actual, $expected, "expected $input_file");
     }
 }
 

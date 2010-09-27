@@ -4,10 +4,18 @@ use base HTML::Parser;
 use warnings;
 use strict;
 use Carp;
+use Readonly;
 
 use version; our $VERSION = qv('0.0.1');
 
 # Module implementation here
+
+Readonly my %START_HANDLERS => (
+    img=>\&_img_start,
+);
+Readonly my %END_HANDLERS => (
+    img=>\&_img_end,
+);
 
 # Buffers
 my $out = "";
@@ -36,18 +44,49 @@ sub _start_process {
     my $self = shift;
     my $tagname = shift;
     my $attr = shift;
-    $out .= "<$tagname";
-    foreach my $key (sort keys %$attr) {
-        $out .= " $key=\"$attr->{$key}\"";
+
+    if (exists $START_HANDLERS{$tagname}) {
+        my $callback = $START_HANDLERS{$tagname};
+        $self->$callback($attr);
     }
-    $out .= ">";
+    else {
+        $out .= "<$tagname";
+        foreach my $key (sort keys %$attr) {
+            $out .= " $key=\"$attr->{$key}\"";
+        }
+        $out .= ">";
+    }
     return;
 }
 
 sub _end_process {
     my $self = shift;
     my $tagname = shift;
-    $out .= "</$tagname>";
+    if (exists $END_HANDLERS{$tagname}) {
+        my $callback = $END_HANDLERS{$tagname};
+        $self->$callback();
+    }
+    else {
+        $out .= "</$tagname>";
+    }
+    return;
+}
+
+sub _img_start {
+    my $self = shift;
+    my $attr = shift;
+
+    return if not my $height = $attr->{height};
+    return if not my $width = $attr->{width};
+    return if not my $alt = $attr->{alt};
+    return if not my $title = $attr->{title};
+    return if not my $src = $attr->{src};
+    $out .= "<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
+         ."title=\"$title\" width=\"$width\" />";
+    return;
+}
+
+sub _img_end {
     return;
 }
 
