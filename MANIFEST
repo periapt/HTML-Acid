@@ -6,8 +6,11 @@ lib/HTML/Acid/Buffer.pm
 MANIFEST
 README
 t/00.load.t
+t/01.progression.t
 t/changes.t
+t/in/00-identical
 t/manifest.t
+t/out/00-identical
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
