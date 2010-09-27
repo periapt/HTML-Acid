@@ -30,6 +30,8 @@ sub new {
     $self->handler(text=>'_text_process', 'self,dtext');
     $self->handler(start=>'_start_process', 'self,tagname,attr');
     $self->handler(end=>'_end_process', 'self,tagname');
+    $self->ignore_elements('script','style');
+    $self->report_tags('h3','p','img','a','em','strong');
     bless $self, $class;
     return $self;
 }
