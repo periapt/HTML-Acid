@@ -12,10 +12,17 @@ use version; our $VERSION = qv('0.0.1');
 
 Readonly my %START_HANDLERS => (
     img=>\&_img_start,
+    h3=>\&_h_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_img_end,
+    h3=>\&_h_end,
 );
+
+Readonly my $START_STATE => 0;
+Readonly my $HEADER_STATE => 1;
+Readonly my $PARA_STATE => 2;
+Readonly my $A_STATE => 3;
 
 sub new {
     my $class = shift;
@@ -55,7 +62,7 @@ sub _start_process {
 
     if (exists $START_HANDLERS{$tagname}) {
         my $callback = $START_HANDLERS{$tagname};
-        $self->$callback($attr);
+        $self->$callback($tagname,$attr);
     }
     else {
         $self->_buffer("<$tagname");
@@ -72,7 +79,7 @@ sub _end_process {
     my $tagname = shift;
     if (exists $END_HANDLERS{$tagname}) {
         my $callback = $END_HANDLERS{$tagname};
-        $self->$callback();
+        $self->$callback($tagname);
     }
     else {
         $self->_buffer("</$tagname>");
@@ -82,6 +89,7 @@ sub _end_process {
 
 sub _img_start {
     my $self = shift;
+    my $tagname = shift;
     my $attr = shift;
 
     return if not my $height = $attr->{height};
@@ -98,13 +106,31 @@ sub _img_end {
     return;
 }
 
+sub _h_start {
+    my $self = shift;
+    my $tagname = shift;
+    my $attr = shift;
+    return if not my $id = $attr->{id};
+    $self->_buffer("<$tagname id=\"$id\">");
+    return;
+}
+
+sub _h_end {
+    my $self = shift;
+    my $tagname = shift;
+    $self->_buffer("</$tagname>");
+    return;
+}
+
 sub _buffer {
     $_[0]->{_buffer} .= $_[1];
     return;
 }
 
 sub _reset {
-    $_[0]->{_buffer} = "";
+    my $self = shift;
+    $self->{_buffer} = "";
+    $self->{_state} = $START_STATE;
     return;
 }
 
