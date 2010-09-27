@@ -21,6 +21,23 @@ sub active {
     return defined $self->{text};
 }
 
+sub start {
+    my $self = shift;
+    $self->{attr} = shift;
+    $self->{text} = "";
+}
+
+sub state {
+    my $self = shift;
+    return $self->{text};
+}
+
+sub add {
+    my $self = shift;
+    $self->{text} .= shift;
+    return;
+}
+
 1; # Magic true value required at end of module
 __END__
 
@@ -59,6 +76,10 @@ buffer.
 =head2 active
 
 This returns true if the buffer is currently active.
+
+=head2 state
+
+This returns the current buffer.
 
 =head1 DIAGNOSTICS
 
