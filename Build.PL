@@ -16,7 +16,7 @@ my $builder = Module::Build->new(
     },
     requires => {
         'version'    => 0,
-        'HTML::Parser' => 0,
+        'HTML::Parser' => 3,
     },
     create_readme=>1,
     create_makefile_pl => 'traditional',
