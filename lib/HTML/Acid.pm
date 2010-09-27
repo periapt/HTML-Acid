@@ -26,7 +26,6 @@ sub new {
         api_version => 3,
         empty_element_tags=>1,
         strict_comment=>1,
-        strict_end=>1,
     );
     $self->handler(text=>'_text_process', 'self,dtext');
     $self->handler(start=>'_start_process', 'self,tagname,attr');
