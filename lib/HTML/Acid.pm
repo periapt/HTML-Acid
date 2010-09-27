@@ -93,6 +93,7 @@ sub _img_end {
 sub burn {
     my $self = shift;
     my $text = shift;
+    $out = "";
     $self->parse($text);
     $self->eof;
     return $out;
