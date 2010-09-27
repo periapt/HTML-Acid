@@ -11,6 +11,8 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
         'Perl6::Slurp' => 0,
         'Readonly'=>0,
+        'Test::Differences'=>0,
+        'Benchmark'=>0,
     },
     requires => {
         'version'    => 0,

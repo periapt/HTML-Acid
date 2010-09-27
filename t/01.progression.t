@@ -8,8 +8,10 @@ use HTML::Acid;
 use Readonly;
 use File::Basename;
 use Perl6::Slurp;
+use Benchmark qw(timethis);
 
 Readonly my @INPUT_FILES => glob 't/in/*';
+Readonly my $MINIMUM_ITERS => 10000;
 plan tests => 5+@INPUT_FILES;
 
 my $acid = HTML::Acid->new;
@@ -20,7 +22,7 @@ is($acid->burn(''), '', 'really trivial stuff');
 
 foreach my $input_file (@INPUT_FILES) {
     subtest $input_file => sub {
-        plan tests => 2;
+        plan tests => 3;
         my $input = slurp $input_file;
         my $basename = basename $input_file;
         my $expected = slurp "t/out/$basename";
@@ -28,6 +30,19 @@ foreach my $input_file (@INPUT_FILES) {
         eq_or_diff($actual, $expected, "expected - $basename");
         $actual = $acid->burn($actual);
         eq_or_diff($actual, $expected, "idempotency - $basename");
+
+        if ($ENV{TEST_AUTHOR}) {
+            my $benchmark = timethis(-10, sub {
+                my $t_acid = HTML::Acid->new;
+                my $t_actual = $t_acid->burn($input);
+                croak "failed" if $t_actual ne $expected;
+            });
+            ok($benchmark->iters > $MINIMUM_ITERS,
+                "minimal iterations - $basename");
+        }
+        else {
+            pass('set TEST_AUTHOR=1 for timings');
+        }
     }
 }
 
