@@ -23,7 +23,8 @@ sub active {
 
 sub start {
     my $self = shift;
-    $self->{attr} = shift;
+    my %args = @_;
+    $self->{attr} = \%args;
     $self->{text} = "";
 }
 
@@ -36,6 +37,18 @@ sub add {
     my $self = shift;
     $self->{text} .= shift;
     return;
+}
+
+sub stop {
+    my $self = shift;
+    my $results = "<$self->{tagname}";
+    foreach my $key (sort keys %{$self->{attr}}) {
+        $results .= " $key=\"$self->{attr}->{$key}\"";
+    }
+    $results .= ">$self->{text}</$self->{tagname}>";
+    delete $self->{text};
+    delete $self->{attr};
+    return $results;
 }
 
 1; # Magic true value required at end of module

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Carp;
-use Test::More tests =>9;
+use Test::More tests =>11;
 use Test::NoWarnings;
 use HTML::Acid::Buffer;
 
@@ -20,4 +20,9 @@ is($acid->state, 'This is a ', 'empty state');
 $acid->add('cool sentence.');
 ok($acid->active, 'active now');
 is($acid->state, 'This is a cool sentence.', 'empty state');
+
+is($acid->stop,
+    '<blah class="xxx" id="yyy">This is a cool sentence.</blah>',
+    'finished');
+ok(!$acid->active, 'active now');
 
