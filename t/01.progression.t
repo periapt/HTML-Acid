@@ -10,8 +10,9 @@ use File::Basename;
 use Perl6::Slurp;
 use Benchmark qw(timethis);
 
-Readonly my @INPUT_FILES => glob 't/in/*';
-Readonly my $MINIMUM_ITERS => 10000;
+Readonly my @INPUT_FILES => glob 't/in/??-*';
+Readonly my $MINIMUM_TIME => 10;
+Readonly my $MINIMUM_ITERS => 900*$MINIMUM_TIME;
 plan tests => 5+@INPUT_FILES;
 
 my $acid = HTML::Acid->new;
@@ -32,7 +33,7 @@ foreach my $input_file (@INPUT_FILES) {
         eq_or_diff($actual, $expected, "idempotency - $basename");
 
         if ($ENV{TEST_AUTHOR}) {
-            my $benchmark = timethis(-10, sub {
+            my $benchmark = timethis(-$MINIMUM_TIME, sub {
                 my $t_acid = HTML::Acid->new;
                 my $t_actual = $t_acid->burn($input);
                 croak "failed" if $t_actual ne $expected;

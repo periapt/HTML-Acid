@@ -17,29 +17,34 @@ Readonly my %END_HANDLERS => (
     img=>\&_img_end,
 );
 
-# Buffers
-my $out = "";
-
 sub new {
     my $class = shift;
+
+    # Configue HTML::Prser options
     my $self = HTML::Parser->new(
         api_version => 3,
         empty_element_tags=>1,
         strict_comment=>1,
     );
+
+    # Set up HTML::Parser handlers
     $self->handler(text=>'_text_process', 'self,dtext');
     $self->handler(start=>'_start_process', 'self,tagname,attr');
     $self->handler(end=>'_end_process', 'self,tagname');
+
+    # Bypass as much as possible
     $self->ignore_elements('script','style');
     $self->report_tags('h3','p','img','a','em','strong');
+
     bless $self, $class;
+    $self->_reset;
     return $self;
 }
 
 sub _text_process {
     my $self = shift;
     my $dtext = shift;
-    $out .= $dtext;
+    $self->_buffer($dtext);
     return;
 }
 
@@ -53,11 +58,11 @@ sub _start_process {
         $self->$callback($attr);
     }
     else {
-        $out .= "<$tagname";
+        $self->_buffer("<$tagname");
         foreach my $key (sort keys %$attr) {
-            $out .= " $key=\"$attr->{$key}\"";
+            $self->_buffer(" $key=\"$attr->{$key}\"");
         }
-        $out .= ">";
+        $self->_buffer(">");
     }
     return;
 }
@@ -70,7 +75,7 @@ sub _end_process {
         $self->$callback();
     }
     else {
-        $out .= "</$tagname>";
+        $self->_buffer("</$tagname>");
     }
     return;
 }
@@ -84,8 +89,8 @@ sub _img_start {
     return if not my $alt = $attr->{alt};
     return if not my $title = $attr->{title};
     return if not my $src = $attr->{src};
-    $out .= "<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
-         ."title=\"$title\" width=\"$width\" />";
+    $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
+         ."title=\"$title\" width=\"$width\" />");
     return;
 }
 
@@ -93,13 +98,23 @@ sub _img_end {
     return;
 }
 
+sub _buffer {
+    $_[0]->{_buffer} .= $_[1];
+    return;
+}
+
+sub _reset {
+    $_[0]->{_buffer} = "";
+    return;
+}
+
 sub burn {
     my $self = shift;
     my $text = shift;
-    $out = "";
+    $self->_reset;
     $self->parse($text);
     $self->eof;
-    return $out;
+    return $self->{_buffer};
 }
 
 1; # Magic true value required at end of module
