@@ -14,9 +14,41 @@ my $out = "";
 
 sub new {
     my $class = shift;
-    my $self = HTML::Parser->new;
+    my $self = HTML::Parser->new(
+        api_version => 3,
+        empty_element_tags=>1,
+    );
+    $self->handler(text=>'_text_process', 'self,dtext');
+    $self->handler(start=>'_start_process', 'self,tagname,attr');
+    $self->handler(end=>'_end_process', 'self,tagname');
     bless $self, $class;
     return $self;
+}
+
+sub _text_process {
+    my $self = shift;
+    my $dtext = shift;
+    $out .= $dtext;
+    return;
+}
+
+sub _start_process {
+    my $self = shift;
+    my $tagname = shift;
+    my $attr = shift;
+    $out .= "<$tagname";
+    foreach my $key (sort keys %$attr) {
+        $out .= " $key=\"$attr->{$key}\"";
+    }
+    $out .= ">";
+    return;
+}
+
+sub _end_process {
+    my $self = shift;
+    my $tagname = shift;
+    $out .= "</$tagname>";
+    return;
 }
 
 sub burn {
