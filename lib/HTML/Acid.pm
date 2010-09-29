@@ -19,11 +19,6 @@ Readonly my %END_HANDLERS => (
     h3=>\&_h_end,
 );
 
-Readonly my $START_STATE => 0;
-Readonly my $HEADER_STATE => 1;
-Readonly my $PARA_STATE => 2;
-Readonly my $A_STATE => 3;
-
 sub new {
     my $class = shift;
 
@@ -130,7 +125,6 @@ sub _buffer {
 sub _reset {
     my $self = shift;
     $self->{_buffer} = "";
-    $self->{_state} = $START_STATE;
     return;
 }
 
@@ -141,6 +135,17 @@ sub burn {
     $self->parse($text);
     $self->eof;
     return $self->{_buffer};
+}
+
+sub default_tag_hierarchy {
+    return {
+        h3 => '',
+        p => '',
+        a => 'p',
+        img => 'p',
+        em => 'p',
+        strong => 'p',
+    };
 }
 
 1; # Magic true value required at end of module
@@ -167,6 +172,9 @@ standards compliant. C<img> tags tend not to be closed. Paragraphs breaks
 might be represented by double C<br> tags rather than C<p> tags. Of course
 we also need to do all the XSS avoidance an HTML clean up routine would,
 such as controlling C<href> tags, removing javascript and inline styling.
+Furthermore what one often wants is not simply a standards compliant cleaned
+up version of the input HTML. Sometimes one wants to know that the HTML
+conforms to a much tigher standard, as then it will be easier to style.
 
 So this module, given a fragment of HTML, will rewrite it into a very
 restricted subset of XHTML.
@@ -174,7 +182,7 @@ restricted subset of XHTML.
 =over
 
 =item * In this dialect, documents consist entirely of C<p> elements and
-C<h1-6> elements.
+C<h3> elements.
 
 =item * Every header will have C<id> attribute automatically generated
 from the header contents.
@@ -201,15 +209,9 @@ breaks.
 
 =head2 new
 
-This constructor takes three named parameters.
+This constructor takes two named parameters.
 
 =over 
-
-=item I<allowed_headers>
-
-This is an array reference of tag names that indicates which elements
-will be allowed as headers within the fragment. It defaults to C<h3> 
-alone.
 
 =item I<external_regex>
 
@@ -217,10 +219,12 @@ This is a regular expression that controls what C<href> and C<src> tags
 are permitted. It defaults to an expression that restricts access to internal
 absolute paths with an optional sub-reference.
 
-=item I<other_tags>
+=item I<tag_hierarchy>
 
-This is an array reference to a list of additional tags that might be 
-permitted inside paragraphs. It defaults to C<em> and C<strong>.
+This is a hash reference that for each supported tag specifies what 
+the containing tag must be. Standards based HTML is not as strict as this.
+This defaults to the value returned by the C<default_tag_hierarchy>
+method.
 
 =back
 
@@ -228,6 +232,22 @@ permitted inside paragraphs. It defaults to C<em> and C<strong>.
 
 This method takes the input HTML as an input and returns the cleaned
 up HTML.
+
+=head2 default_tag_hierarchy
+
+This is a class method that returns the default tag hierarchy. So if 
+you want to add support for a tag you can use a modified copy of the 
+output when setting up the L<HTML::Acid> instance. The default
+mapping is as follows:
+
+    {
+        h3 => '',
+        p => '',
+        a => 'p',
+        img => 'p',
+        em => 'p',
+        strong => 'p',
+    }
 
 =head1 DIAGNOSTICS
 
