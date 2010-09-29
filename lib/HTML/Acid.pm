@@ -12,15 +12,26 @@ use version; our $VERSION = qv('0.0.1');
 
 Readonly my %START_HANDLERS => (
     img=>\&_img_start,
+    h1=>\&_h_start,
+    h2=>\&_h_start,
     h3=>\&_h_start,
+    h4=>\&_h_start,
+    h5=>\&_h_start,
+    h6=>\&_h_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_img_end,
+    h1=>\&_h_end,
+    h2=>\&_h_end,
     h3=>\&_h_end,
+    h4=>\&_h_end,
+    h5=>\&_h_end,
+    h6=>\&_h_end,
 );
 
 sub new {
     my $class = shift;
+    my $tag_hierarchy = shift || $class->default_tag_hierarchy;
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
@@ -36,7 +47,26 @@ sub new {
 
     # Bypass as much as possible
     $self->ignore_elements('script','style');
-    $self->report_tags('h3','p','img','a','em','strong');
+    my @tags = sort {
+        # sort like this so that the later depth calcs do not
+        # loop for ever.
+        $tag_hierarchy->{$a} cmp $tag_hierarchy->{$b}
+    } keys %$tag_hierarchy;
+    $self->report_tags(@tags, 'br');
+
+    # calculate depths
+    $self->{_acid_depths}->{''} = 0;
+    while(@tags) {
+        my $tag = shift @tags;
+        my $value = $tag_hierarchy->{$tag};
+        if (exists $self->{_acid_depths}->{$value}) {
+            $self->{_acid_depths}->{$tag}
+                = $self->{_acid_depths}->{$value} + 1;
+        }
+        else {
+            push @tags, $tag;
+        }
+    }
 
     bless $self, $class;
     $self->_reset;
@@ -174,7 +204,7 @@ we also need to do all the XSS avoidance an HTML clean up routine would,
 such as controlling C<href> tags, removing javascript and inline styling.
 Furthermore what one often wants is not simply a standards compliant cleaned
 up version of the input HTML. Sometimes one wants to know that the HTML
-conforms to a much tigher standard, as then it will be easier to style.
+conforms to a much tighter standard, as then it will be easier to style.
 
 So this module, given a fragment of HTML, will rewrite it into a very
 restricted subset of XHTML.
