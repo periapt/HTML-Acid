@@ -106,7 +106,9 @@ sub _start_process {
         if ($actual_depth >= $required_depth) {
             $self->_end_process($actual_state);
         }
-        $self->_start_process($required_state, {});
+        if ($required_state) {
+            $self->_start_process($required_state, {});
+        }
     }
 
     if (exists $START_HANDLERS{$tagname}) {
