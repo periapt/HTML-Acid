@@ -137,9 +137,8 @@ sub _end_process {
     if ($tagname ne $actual_state) {
         my $tag_depth = $self->{_acid_depths}->{$tagname};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
-        if ($tag_depth < $actual_depth) {
-            $self->_end_process($actual_state);
-        }
+        return if $tag_depth >= $actual_depth;
+        $self->_end_process($actual_state);
     }
 
     if (exists $END_HANDLERS{$tagname}) {
