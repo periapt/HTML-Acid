@@ -20,7 +20,7 @@ isa_ok($acid, 'HTML::Acid', 'is a HTML::Acid');
 isa_ok($acid, 'HTML::Parser', 'is a HTML::Parser');
 ok($acid->can('burn'), 'Acid can burn.');
 is($acid->burn(''), '', 'really trivial stuff');
-is($acid->burn('blah'), '<p>blah</p>', 'really trivial blah');
+is($acid->burn('blah'), "<p>blah</p>\n", 'really trivial blah');
 
 foreach my $input_file (@INPUT_FILES) {
     subtest $input_file => sub {

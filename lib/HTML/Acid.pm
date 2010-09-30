@@ -161,7 +161,8 @@ sub _end_document {
     # We want to end in the start state.
     my $actual_state = $self->{_acid_state};
     if ($actual_state ne '') {
-        $self->_end_process($actual_state);
+        $self->_end_process('p');
+        $self->_buffer("\n");
     }
 
     return;
