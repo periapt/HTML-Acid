@@ -175,13 +175,17 @@ sub _img_start {
     my $tagname = shift;
     my $attr = shift;
 
-    return if not my $height = $attr->{height};
-    return if not my $width = $attr->{width};
     return if not my $alt = $attr->{alt};
-    return if not my $title = $attr->{title};
-    return if not my $src = $attr->{src};
-    $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
+    if (my $height = $attr->{height} and
+        my $width = $attr->{width} and
+        my $title = $attr->{title} and
+        my $src = $attr->{src}) {
+        $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
          ."title=\"$title\" width=\"$width\" />");
+    }
+    else {
+       $self->_buffer(" $alt ");
+    }
     return;
 }
 
