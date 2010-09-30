@@ -67,6 +67,7 @@ sub new {
             push @tags, $tag;
         }
     }
+    $self->{_acid_hierarchy} = $tag_hierarchy;
 
     bless $self, $class;
     $self->_reset;
@@ -85,6 +86,10 @@ sub _start_process {
     my $tagname = shift;
     my $attr = shift;
 
+    # To call _start_process unhindered
+    # the parent tag of $tagname must be the
+    # current state.
+
     if (exists $START_HANDLERS{$tagname}) {
         my $callback = $START_HANDLERS{$tagname};
         $self->$callback($tagname,$attr);
@@ -96,6 +101,10 @@ sub _start_process {
         }
         $self->_buffer(">");
     }
+
+    # State shifts to the current tag.
+    $self->{_acid_state} = $tagname;
+
     return;
 }
 
@@ -109,6 +118,10 @@ sub _end_process {
     else {
         $self->_buffer("</$tagname>");
     }
+
+    # State shifts to the parent tag.
+    $self->{_acid_state} = $self->{_acid_hierarchy}->{$tagname};
+
     return;
 }
 
@@ -155,6 +168,7 @@ sub _buffer {
 sub _reset {
     my $self = shift;
     $self->{_acid_buffer} = "";
+    $self->{_acid_state} = "";
     return;
 }
 
