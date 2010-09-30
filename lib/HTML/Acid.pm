@@ -148,13 +148,13 @@ sub _h_end {
 }
 
 sub _buffer {
-    $_[0]->{_buffer} .= $_[1];
+    $_[0]->{_acid_buffer} .= $_[1];
     return;
 }
 
 sub _reset {
     my $self = shift;
-    $self->{_buffer} = "";
+    $self->{_acid_buffer} = "";
     return;
 }
 
@@ -164,7 +164,7 @@ sub burn {
     $self->_reset;
     $self->parse($text);
     $self->eof;
-    return $self->{_buffer};
+    return $self->{_acid_buffer};
 }
 
 sub default_tag_hierarchy {
