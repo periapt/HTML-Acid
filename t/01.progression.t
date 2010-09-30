@@ -12,14 +12,15 @@ use Benchmark qw(timethis);
 
 Readonly my @INPUT_FILES => glob 't/in/??-*';
 Readonly my $MINIMUM_TIME => 10;
-Readonly my $MINIMUM_ITERS => 700*$MINIMUM_TIME;
-plan tests => 5+@INPUT_FILES;
+Readonly my $MINIMUM_ITERS => 600*$MINIMUM_TIME;
+plan tests => 6+@INPUT_FILES;
 
 my $acid = HTML::Acid->new;
 isa_ok($acid, 'HTML::Acid', 'is a HTML::Acid');
 isa_ok($acid, 'HTML::Parser', 'is a HTML::Parser');
 ok($acid->can('burn'), 'Acid can burn.');
 is($acid->burn(''), '', 'really trivial stuff');
+is($acid->burn('blah'), '<p>blah</p>', 'really trivial blah');
 
 foreach my $input_file (@INPUT_FILES) {
     subtest $input_file => sub {

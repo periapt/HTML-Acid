@@ -44,6 +44,7 @@ sub new {
     $self->handler(text=>'_text_process', 'self,dtext');
     $self->handler(start=>'_start_process', 'self,tagname,attr');
     $self->handler(end=>'_end_process', 'self,tagname');
+    $self->handler(end_document=>'_end_document', 'self');
 
     # Bypass as much as possible
     $self->ignore_elements('script','style');
@@ -77,6 +78,14 @@ sub new {
 sub _text_process {
     my $self = shift;
     my $dtext = shift;
+
+    # To add to the buffer unhindered we must not be in the 
+    # start state.
+    my $actual_state = $self->{_acid_state};
+    if ($actual_state eq '' and $dtext =~ /\S/) {
+        $self->_start_process('p', {});
+    }
+
     $self->_buffer($dtext);
     return;
 }
@@ -89,6 +98,16 @@ sub _start_process {
     # To call _start_process unhindered
     # the parent tag of $tagname must be the
     # current state.
+    my $required_state = $self->{_acid_hierarchy}->{$tagname};
+    my $actual_state = $self->{_acid_state};
+    if ($required_state ne $actual_state) {
+        my $required_depth = $self->{_acid_depths}->{$required_state};
+        my $actual_depth = $self->{_acid_depths}->{$actual_state};
+        if ($actual_depth >= $required_depth) {
+            $self->_end_process($actual_state);
+        }
+        $self->_start_process($required_state, {});
+    }
 
     if (exists $START_HANDLERS{$tagname}) {
         my $callback = $START_HANDLERS{$tagname};
@@ -111,6 +130,18 @@ sub _start_process {
 sub _end_process {
     my $self = shift;
     my $tagname = shift;
+
+    # To call _start_process unhindered
+    # $tagname must be the current state.
+    my $actual_state = $self->{_acid_state};
+    if ($tagname ne $actual_state) {
+        my $tag_depth = $self->{_acid_depths}->{$tagname};
+        my $actual_depth = $self->{_acid_depths}->{$actual_state};
+        if ($tag_depth < $actual_depth) {
+            $self->_end_process($actual_state);
+        }
+    }
+
     if (exists $END_HANDLERS{$tagname}) {
         my $callback = $END_HANDLERS{$tagname};
         $self->$callback($tagname);
@@ -121,6 +152,18 @@ sub _end_process {
 
     # State shifts to the parent tag.
     $self->{_acid_state} = $self->{_acid_hierarchy}->{$tagname};
+
+    return;
+}
+
+sub _end_document {
+    my $self = shift;
+
+    # We want to end in the start state.
+    my $actual_state = $self->{_acid_state};
+    if ($actual_state ne '') {
+        $self->_end_process($actual_state);
+    }
 
     return;
 }
