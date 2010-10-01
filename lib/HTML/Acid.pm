@@ -45,6 +45,7 @@ sub new {
     $self->handler(start=>'_start_process', 'self,tagname,attr');
     $self->handler(end=>'_end_process', 'self,tagname');
     $self->handler(end_document=>'_end_document', 'self');
+    $self->handler(start_document=>'_reset', 'self');
 
     # Bypass as much as possible
     $self->ignore_elements('script','style');
@@ -71,7 +72,6 @@ sub new {
     $self->{_acid_hierarchy} = $tag_hierarchy;
 
     bless $self, $class;
-    $self->_reset;
     return $self;
 }
 
@@ -224,7 +224,6 @@ sub _reset {
 sub burn {
     my $self = shift;
     my $text = shift;
-    $self->_reset;
     $self->parse($text);
     $self->eof;
     return $self->{_acid_buffer};
