@@ -18,9 +18,10 @@ Readonly my %START_HANDLERS => (
     h4=>\&_h_start,
     h5=>\&_h_start,
     h6=>\&_h_start,
+#    br=>\&_br_start,
 );
 Readonly my %END_HANDLERS => (
-    img=>\&_img_end,
+    img=>\&_null,
     h1=>\&_h_end,
     h2=>\&_h_end,
     h3=>\&_h_end,
@@ -73,6 +74,9 @@ sub new {
 
     bless $self, $class;
     return $self;
+}
+
+sub _null {
 }
 
 sub _text_process {
@@ -186,10 +190,6 @@ sub _img_start {
     else {
        $self->_buffer(" $alt ");
     }
-    return;
-}
-
-sub _img_end {
     return;
 }
 
