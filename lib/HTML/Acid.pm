@@ -21,6 +21,7 @@ Readonly my %START_HANDLERS => (
     h5=>\&_h_start,
     h6=>\&_h_start,
     p=>\&_p_start,
+#    a=>\&_a_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_null,
@@ -31,11 +32,23 @@ Readonly my %END_HANDLERS => (
     h5=>\&_h_end,
     h6=>\&_h_end,
     p=>\&_p_end,
+#    a=>\&_a_end,
 );
+
+Readonly my $EXTERNAL_REGEX => qr{
+    \A                  # start of string
+    /                   # internal URLs only by default
+    \w                  # at least one normal character
+    [\w\-/]*            # 
+    (?:\#[\w\-]+)?      # optional anchor
+    \z                  # end of string
+}xms;
 
 sub new {
     my $class = shift;
-    my $tag_hierarchy = shift || $class->default_tag_hierarchy;
+    my %args = @_;
+    my $tag_hierarchy = $args{tag_hierarchy} || $class->default_tag_hierarchy;
+    my $external_regex = $args{external_regex} || $EXTERNAL_REGEX;
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
@@ -74,6 +87,7 @@ sub new {
         }
     }
     $self->{_acid_hierarchy} = $tag_hierarchy;
+    $self->{_acid_external} = $external_regex;
 
     bless $self, $class;
     return $self;
@@ -206,10 +220,11 @@ sub _img_start {
     my $attr = shift;
 
     return if not my $alt = $attr->{alt};
-    if (my $height = $attr->{height} and
+    my $src = $self->_external($attr->{src});
+    if ($src and
+        my $height = $attr->{height} and
         my $width = $attr->{width} and
-        my $title = $attr->{title} and
-        my $src = $attr->{src}) {
+        my $title = $attr->{title}) {
         $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
          ."title=\"$title\" width=\"$width\" />");
     }
@@ -218,6 +233,14 @@ sub _img_start {
     }
     return;
 }
+
+sub _external {
+    my $self = shift;
+    my $url = shift;
+    return if not $url;
+    return if $url !~ $self->{_acid_external};
+    return $url;
+}       
 
 sub _h_start {
     my $self = shift;
