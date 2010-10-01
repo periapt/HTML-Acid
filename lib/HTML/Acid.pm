@@ -6,6 +6,7 @@ use strict;
 use Carp;
 use Readonly;
 use HTML::Acid::Buffer;
+use String::Dirify qw(dirify);
 
 use version; our $VERSION = qv('0.0.1');
 
@@ -19,6 +20,7 @@ Readonly my %START_HANDLERS => (
     h4=>\&_h_start,
     h5=>\&_h_start,
     h6=>\&_h_start,
+    p=>\&_p_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_null,
@@ -28,6 +30,7 @@ Readonly my %END_HANDLERS => (
     h4=>\&_h_end,
     h5=>\&_h_end,
     h6=>\&_h_end,
+    p=>\&_p_end,
 );
 
 sub new {
@@ -220,15 +223,41 @@ sub _h_start {
     my $self = shift;
     my $tagname = shift;
     my $attr = shift;
-    return if not my $id = $attr->{id};
-    $self->_buffer("<$tagname id=\"$id\">");
+    my $buffer = HTML::Acid::Buffer->new($tagname);
+    $buffer->set_attr($attr);
+    unshift @{$self->{_acid_buffer}}, $buffer;
     return;
 }
 
 sub _h_end {
     my $self = shift;
     my $tagname = shift;
-    $self->_buffer("</$tagname>");
+    my $buffer = shift @{$self->{_acid_buffer}};
+    my $attr = $buffer->get_attr;
+    my $text = $buffer->state;
+    return if not $text;
+    if (not $attr->{id}) {
+        $attr->{id} = dirify($text,'-');
+        $buffer->set_attr($attr);
+    }
+    $self->_buffer($buffer->stop);
+    return;
+}
+
+sub _p_start {
+    my $self = shift;
+    my $tagname = shift;
+    unshift @{$self->{_acid_buffer}}, HTML::Acid::Buffer->new($tagname);
+    return;
+}
+
+sub _p_end {
+    my $self = shift;
+    my $tagname = shift;
+    my $buffer = shift @{$self->{_acid_buffer}};
+    if ($buffer->state =~ /\S/) {
+        $self->_buffer($buffer->stop);
+    }
     return;
 }
 

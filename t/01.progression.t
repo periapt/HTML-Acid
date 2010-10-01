@@ -10,9 +10,9 @@ use File::Basename;
 use Perl6::Slurp;
 use Benchmark qw(timethis);
 
-Readonly my @INPUT_FILES => glob 't/in/[012]?-*';
+Readonly my @INPUT_FILES => glob 't/in/??-*';
 Readonly my $MINIMUM_TIME => 10;
-Readonly my $MINIMUM_ITERS => 300*$MINIMUM_TIME;
+Readonly my $MINIMUM_ITERS => 200*$MINIMUM_TIME;
 plan tests => 6+@INPUT_FILES;
 
 my $acid = HTML::Acid->new;

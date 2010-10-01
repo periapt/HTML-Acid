@@ -28,6 +28,17 @@ sub start {
     $self->{text} = "";
 }
 
+sub get_attr {
+    my $self = shift;
+    return $self->{attr};
+}
+
+sub set_attr {
+    my $self = shift;
+    my $attr = shift;
+    $self->{attr} = $attr;
+}
+
 sub state {
     my $self = shift;
     return $self->{text};
