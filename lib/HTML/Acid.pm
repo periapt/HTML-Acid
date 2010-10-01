@@ -21,7 +21,7 @@ Readonly my %START_HANDLERS => (
     h5=>\&_h_start,
     h6=>\&_h_start,
     p=>\&_p_start,
-#    a=>\&_a_start,
+    a=>\&_a_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_null,
@@ -32,7 +32,7 @@ Readonly my %END_HANDLERS => (
     h5=>\&_h_end,
     h6=>\&_h_end,
     p=>\&_p_end,
-#    a=>\&_a_end,
+    a=>\&_a_end,
 );
 
 Readonly my $EXTERNAL_REGEX => qr{
@@ -159,15 +159,12 @@ sub _start_process {
         $self->$callback($tagname,$attr);
     }
     else {
-        $self->_buffer("<$tagname");
-        foreach my $key (sort keys %$attr) {
-            $self->_buffer(" $key=\"$attr->{$key}\"");
-        }
-        $self->_buffer(">");
+        $self->_buffer("<$tagname>");
     }
 
     # State shifts to the current tag.
-    $self->{_acid_state} = $tagname;
+    # The 'img' end tag does not get called in some cases.
+    $self->{_acid_state} = $tagname if $tagname ne 'img';
 
     return;
 }
@@ -242,6 +239,38 @@ sub _external {
     return $url;
 }       
 
+sub _a_start {
+    my $self = shift;
+    my $tagname = shift;
+    my $attr = shift;
+    my $buffer = HTML::Acid::Buffer->new($tagname);
+    $buffer->set_attr($attr);
+    unshift @{$self->{_acid_buffer}}, $buffer;
+    return;
+}
+
+sub _a_end {
+    my $self = shift;
+    my $tagname = shift;
+    my $buffer = shift @{$self->{_acid_buffer}};
+    my $attr = $buffer->get_attr;
+    my $text = $buffer->state;
+    return if not $text;
+    return if $text !~ /\S/;
+    my $href = $self->_external($attr->{href});
+    if (not $href) {
+       $self->_buffer(" $text ");
+       return;
+    }
+    my $new_attr = {href=>$href};
+    if ($attr->{title}) {
+        $new_attr->{title} = $attr->{title};
+    }
+    $buffer->set_attr($new_attr);
+    $self->_buffer($buffer->stop);
+    return;
+}
+
 sub _h_start {
     my $self = shift;
     my $tagname = shift;
@@ -259,10 +288,8 @@ sub _h_end {
     my $attr = $buffer->get_attr;
     my $text = $buffer->state;
     return if not $text;
-    if (not $attr->{id}) {
-        $attr->{id} = dirify($text,'-');
-        $buffer->set_attr($attr);
-    }
+    my $id = exists $attr->{id} ? $attr->{id} : dirify($text,'-');
+    $buffer->set_attr({id=>$id});
     $self->_buffer($buffer->stop);
     return;
 }
