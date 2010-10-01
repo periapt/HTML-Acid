@@ -40,6 +40,7 @@ t/in/33-empty-anchor
 t/in/34-external-href
 t/in/35-almost-empty-anchor
 t/in/36-missing-anchor-title
+t/in/37-empty-header
 t/manifest.t
 t/out/00-identical
 t/out/01-unclosed-image
@@ -71,7 +72,7 @@ t/out/33-empty-anchor
 t/out/34-external-href
 t/out/35-almost-empty-anchor
 t/out/36-missing-anchor-title
-t/out/header-id
+t/out/37-empty-header
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t

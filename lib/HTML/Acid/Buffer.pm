@@ -12,20 +12,10 @@ sub new {
     my $class = shift;
     my $self = {};
     $self->{tagname} = shift || '';
+    $self->{text} = "";
+    $self->{attr} = {};
     bless $self, $class;
     return $self;
-}
-
-sub active {
-    my $self = shift;
-    return defined $self->{text};
-}
-
-sub start {
-    my $self = shift;
-    my %args = @_;
-    $self->{attr} = \%args;
-    $self->{text} = "";
 }
 
 sub get_attr {
@@ -54,7 +44,7 @@ sub stop {
     my $self = shift;
     my $tagname = $self->{tagname};
     my $results = $tagname ? "<$tagname" : '';
-    my $text = exists $self->{text} ? $self->{text} : '';
+    my $text = $self->{text};
     if (exists $self->{attr}) {
         foreach my $key (sort keys %{$self->{attr}}) {
             $results .= " $key=\"$self->{attr}->{$key}\"";
@@ -86,11 +76,8 @@ This class is not used directly.
 
 =head2 new
 
-This takes a tag name as a mandatory argument.
-
-=head2 start
-
-This optionally takes an attribute hash ref.
+This takes a tag name as an argument. Without a tag name
+it will behave as the top level buffer.
 
 =head2 add
 
@@ -101,13 +88,17 @@ This takes new text content and adds it to the buffer.
 This returns the current state of the content and clears the
 buffer.
 
-=head2 active
-
-This returns true if the buffer is currently active.
-
 =head2 state
 
 This returns the current buffer.
+
+=head2 get_attr
+
+This gets the attribute hash.
+
+=head2 set_attr
+
+This sets the attribute hash.
 
 =head1 DIAGNOSTICS
 
