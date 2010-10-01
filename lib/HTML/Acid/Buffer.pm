@@ -11,7 +11,7 @@ use version; our $VERSION = qv('0.0.1');
 sub new {
     my $class = shift;
     my $self = {};
-    $self->{tagname} = shift;
+    $self->{tagname} = shift || '';
     bless $self, $class;
     return $self;
 }
@@ -41,11 +41,15 @@ sub add {
 
 sub stop {
     my $self = shift;
-    my $results = "<$self->{tagname}";
-    foreach my $key (sort keys %{$self->{attr}}) {
-        $results .= " $key=\"$self->{attr}->{$key}\"";
+    my $tagname = $self->{tagname};
+    my $results = $tagname ? "<$tagname" : '';
+    my $text = exists $self->{text} ? $self->{text} : '';
+    if (exists $self->{attr}) {
+        foreach my $key (sort keys %{$self->{attr}}) {
+            $results .= " $key=\"$self->{attr}->{$key}\"";
+        }
     }
-    $results .= ">$self->{text}</$self->{tagname}>";
+    $results .= ($tagname ? ">$text</$tagname>" : $text);
     delete $self->{text};
     delete $self->{attr};
     return $results;

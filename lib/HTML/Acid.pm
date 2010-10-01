@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Carp;
 use Readonly;
+use HTML::Acid::Buffer;
 
 use version; our $VERSION = qv('0.0.1');
 
@@ -232,13 +233,15 @@ sub _h_end {
 }
 
 sub _buffer {
-    $_[0]->{_acid_buffer} .= $_[1];
+    my $self = shift;
+    my $text = shift;
+    $self->{_acid_buffer}->[0]->add($text);
     return;
 }
 
 sub _reset {
     my $self = shift;
-    $self->{_acid_buffer} = "";
+    $self->{_acid_buffer} = [HTML::Acid::Buffer->new];
     $self->{_acid_state} = "";
     $self->{_acid_br} = 0;
     return;
@@ -249,7 +252,7 @@ sub burn {
     my $text = shift;
     $self->parse($text);
     $self->eof;
-    return $self->{_acid_buffer};
+    return $self->{_acid_buffer}->[0]->stop;
 }
 
 sub default_tag_hierarchy {
