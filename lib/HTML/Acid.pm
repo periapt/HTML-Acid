@@ -18,7 +18,6 @@ Readonly my %START_HANDLERS => (
     h4=>\&_h_start,
     h5=>\&_h_start,
     h6=>\&_h_start,
-#    br=>\&_br_start,
 );
 Readonly my %END_HANDLERS => (
     img=>\&_null,
@@ -77,16 +76,23 @@ sub new {
 }
 
 sub _null {
+    # null event handler
 }
 
 sub _text_process {
     my $self = shift;
     my $dtext = shift;
+    my $text_nontrivial = $dtext =~ /\S/;
+
+    # New text clears a single <br> tag
+    if ($self->{_acid_br} and $text_nontrivial) {
+        $self->{_acid_br} = 0;
+    }
 
     # To add to the buffer unhindered we must not be in the 
     # start state.
     my $actual_state = $self->{_acid_state};
-    if ($actual_state eq '' and $dtext =~ /\S/) {
+    if ($actual_state eq '' and $text_nontrivial) {
         $self->_start_process('p', {});
     }
 
@@ -99,11 +105,26 @@ sub _start_process {
     my $tagname = shift;
     my $attr = shift;
 
+    my $actual_state = $self->{_acid_state};
+
+    #  Two br tags in a row means 'new paragraph'.
+    if ($tagname eq 'br') {
+        return if $actual_state ne 'p';
+        if ($self->{_acid_br}) {
+            $self->{_acid_br} = 0;
+            $self->_end_process('p');
+        }
+        else {
+            $self->{_acid_br} = 1;
+        }
+        return;
+    }
+    $self->{_acid_br} = 0;
+
     # To call _start_process unhindered
     # the parent tag of $tagname must be the
     # current state.
     my $required_state = $self->{_acid_hierarchy}->{$tagname};
-    my $actual_state = $self->{_acid_state};
     if ($required_state ne $actual_state) {
         my $required_depth = $self->{_acid_depths}->{$required_state};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
@@ -136,6 +157,7 @@ sub _start_process {
 sub _end_process {
     my $self = shift;
     my $tagname = shift;
+    return if $tagname eq 'br';
 
     # To call _start_process unhindered
     # $tagname must be the current state.
@@ -218,6 +240,7 @@ sub _reset {
     my $self = shift;
     $self->{_acid_buffer} = "";
     $self->{_acid_state} = "";
+    $self->{_acid_br} = 0;
     return;
 }
 
