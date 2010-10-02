@@ -12,10 +12,10 @@ use Benchmark qw(timethis);
 
 Readonly my @INPUT_FILES => glob 't/in/??-*';
 Readonly my $MINIMUM_TIME => 10;
-Readonly my $MINIMUM_ITERS => 200*$MINIMUM_TIME;
+Readonly my $MINIMUM_ITERS => 190*$MINIMUM_TIME;
 plan tests => 6+@INPUT_FILES;
 
-my $acid = HTML::Acid->new(
+Readonly my %ARGS => (
     url_regex=>qr{
         \A                  # start of string
         (?:
@@ -42,6 +42,8 @@ my $acid = HTML::Acid->new(
         strong => 'p',
     },
 );
+my $acid = HTML::Acid->new(%ARGS);
+
 isa_ok($acid, 'HTML::Acid', 'is a HTML::Acid');
 isa_ok($acid, 'HTML::Parser', 'is a HTML::Parser');
 ok($acid->can('burn'), 'Acid can burn.');
@@ -61,7 +63,7 @@ foreach my $input_file (@INPUT_FILES) {
 
         if ($ENV{TEST_AUTHOR}) {
             my $benchmark = timethis(-$MINIMUM_TIME, sub {
-                my $t_acid = HTML::Acid->new;
+                my $t_acid = HTML::Acid->new(%ARGS);
                 my $t_actual = $t_acid->burn($input);
                 croak "failed" if $t_actual ne $expected;
             });
