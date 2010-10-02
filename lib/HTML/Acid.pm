@@ -47,8 +47,14 @@ Readonly my $URL_REGEX => qr{
 sub new {
     my $class = shift;
     my %args = @_;
-    my $tag_hierarchy = $args{tag_hierarchy} || $class->default_tag_hierarchy;
-    my $url_regex = $args{url_regex} || $URL_REGEX;
+    my $tag_hierarchy = $args{tag_hierarchy};
+    if (not $tag_hierarchy) {
+        $tag_hierarchy = $class->default_tag_hierarchy;
+    }
+    my $url_regex = $args{url_regex};
+    if (not $url_regex) {
+        $url_regex = $URL_REGEX;
+    }
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
