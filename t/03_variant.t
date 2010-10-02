@@ -10,7 +10,7 @@ use File::Basename;
 use Perl6::Slurp;
 use Benchmark qw(timethis);
 
-Readonly my @INPUT_FILES => glob 't/in/00-*';
+Readonly my @INPUT_FILES => glob 't/in/[0123]?-*';
 Readonly my $MINIMUM_TIME => 10;
 Readonly my $MINIMUM_ITERS => 200*$MINIMUM_TIME;
 plan tests => 6+@INPUT_FILES;
