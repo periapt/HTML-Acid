@@ -35,7 +35,7 @@ Readonly my %END_HANDLERS => (
     a=>\&_a_end,
 );
 
-Readonly my $EXTERNAL_REGEX => qr{
+Readonly my $URL_REGEX => qr{
     \A                  # start of string
     /                   # internal URLs only by default
     \w                  # at least one normal character
@@ -48,7 +48,7 @@ sub new {
     my $class = shift;
     my %args = @_;
     my $tag_hierarchy = $args{tag_hierarchy} || $class->default_tag_hierarchy;
-    my $external_regex = $args{external_regex} || $EXTERNAL_REGEX;
+    my $url_regex = $args{url_regex} || $URL_REGEX;
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
@@ -87,7 +87,7 @@ sub new {
         }
     }
     $self->{_acid_hierarchy} = $tag_hierarchy;
-    $self->{_acid_external} = $external_regex;
+    $self->{_acid_url_regex} = $url_regex;
 
     bless $self, $class;
     return $self;
@@ -217,7 +217,7 @@ sub _img_start {
     my $attr = shift;
 
     return if not my $alt = $attr->{alt};
-    my $src = $self->_external($attr->{src});
+    my $src = $self->_url($attr->{src});
     if ($src and
         my $height = $attr->{height} and
         my $width = $attr->{width} and
@@ -231,11 +231,11 @@ sub _img_start {
     return;
 }
 
-sub _external {
+sub _url {
     my $self = shift;
     my $url = shift;
     return if not $url;
-    return if $url !~ $self->{_acid_external};
+    return if $url !~ $self->{_acid_url_regex};
     return $url;
 }       
 
@@ -257,7 +257,7 @@ sub _a_end {
     my $text = $buffer->state;
     return if not $text;
     return if $text !~ /\S/;
-    my $href = $self->_external($attr->{href});
+    my $href = $self->_url($attr->{href});
     if (not $href) {
        $self->_buffer(" $text ");
        return;
@@ -410,7 +410,7 @@ This constructor takes two named parameters.
 
 =over 
 
-=item I<external_regex>
+=item I<url_regex>
 
 This is a regular expression that controls what C<href> and C<src> tags
 are permitted. It defaults to an expression that restricts access to internal
