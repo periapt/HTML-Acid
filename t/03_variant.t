@@ -10,7 +10,7 @@ use File::Basename;
 use Perl6::Slurp;
 use Benchmark qw(timethis);
 
-Readonly my @INPUT_FILES => glob 't/in/[0123]?-*';
+Readonly my @INPUT_FILES => glob 't/in/??-*';
 Readonly my $MINIMUM_TIME => 10;
 Readonly my $MINIMUM_ITERS => 200*$MINIMUM_TIME;
 plan tests => 6+@INPUT_FILES;
@@ -19,11 +19,16 @@ my $acid = HTML::Acid->new(
     url_regex=>qr{
         \A                  # start of string
         (?:
-            http://\w[\w\.]{1,20}\w
-        )?                  # optional external ref
-        /                   # 
-        \w                  # at least one normal character
-        [\w\-/]*            # 
+            (?:
+                http://\w[\w\.]{1,20}\w
+            )                  # optional external ref
+            |
+            (?:
+                /                   # 
+                \w                  # at least one normal character
+                [\w\-/]*            # 
+            )
+        )
         (?:\#[\w\-]+)?      # optional anchor
         \z                  # end of string
     }xms,
