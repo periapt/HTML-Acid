@@ -1,4 +1,4 @@
-package HTML::Acid;
+package Data::FormValidator::Filters::HTML::Acid;
 use base qw(Exporter);
 
 @EXPORT = qw(filter_html);
