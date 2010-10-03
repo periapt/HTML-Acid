@@ -24,7 +24,6 @@ Readonly my %START_HANDLERS => (
     a=>\&_a_start,
 );
 Readonly my %END_HANDLERS => (
-    img=>\&_null,
     h1=>\&_h_end,
     h2=>\&_h_end,
     h3=>\&_h_end,
@@ -97,10 +96,6 @@ sub new {
 
     bless $self, $class;
     return $self;
-}
-
-sub _null {
-    # null event handler
 }
 
 sub _text_process {

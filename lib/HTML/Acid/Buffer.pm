@@ -45,10 +45,8 @@ sub stop {
     my $tagname = $self->{tagname};
     my $results = $tagname ? "<$tagname" : '';
     my $text = $self->{text};
-    if (exists $self->{attr}) {
-        foreach my $key (sort keys %{$self->{attr}}) {
-            $results .= " $key=\"$self->{attr}->{$key}\"";
-        }
+    foreach my $key (sort keys %{$self->{attr}}) {
+        $results .= " $key=\"$self->{attr}->{$key}\"";
     }
     $results .= ($tagname ? ">$text</$tagname>" : $text);
     delete $self->{text};

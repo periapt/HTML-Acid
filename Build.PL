@@ -10,13 +10,14 @@ my $builder = Module::Build->new(
     build_requires => {
         'Test::More' => 0,
         'Perl6::Slurp' => 0,
-        'Readonly'=>0,
         'Test::Differences'=>0,
         'Benchmark'=>0,
     },
     requires => {
         'version'    => 0,
         'HTML::Parser' => 3,
+        'String::Dirify'=>0,
+        'Readonly'=>0,
     },
     create_readme=>1,
     create_makefile_pl => 'traditional',
