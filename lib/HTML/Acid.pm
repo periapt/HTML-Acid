@@ -375,26 +375,26 @@ up version of the input HTML. Sometimes one wants to know that the HTML
 conforms to a much tighter standard, as then it will be easier to style.
 
 So this module, given a fragment of HTML, will rewrite it into a very
-restricted subset of XHTML.
+restricted subset of XHTML. The default dialect has the following properties.
 
 =over
 
-=item * In this dialect, documents consist entirely of C<p> elements and
+=item * Documents consist entirely of C<p> elements and
 C<h3> elements.
 
 =item * Every header will have C<id> attribute automatically generated
 from the header contents.
 
-=item * Every paragraph may consist of text, C<a> elements, C<img> elements
-and other elements decided by the configuration.
+=item * Every paragraph may consist of text, C<a> elements, C<img> elements,
+C<strong> and C<em> elements.
 
-=item * Anchors must have an C<href> attribute matching a regular
-expression set in the configuration. By default C<href>s are required to be
-internal. They may also have a C<title> attribute.
+=item * Anchors must have an C<href> attribute referring to an internal
+URL. They may also have a C<title> attribute.
 
 =item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
 attributes. The C<src> attribute must match the same regular expression
-as C<href>.
+as C<href>. If any of these tags are missing the image is replaced by 
+the contents of the alt tag.
 
 =item * All other tags must have no attributes and may only contain text.
 
