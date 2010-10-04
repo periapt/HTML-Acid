@@ -43,6 +43,12 @@ Readonly my $URL_REGEX => qr{
     \z                  # end of string
 }xms;
 
+Readonly my $ALT_REGEX => qr{
+    \A                  # start of string
+    [\w\s\.\,]+         # 
+    \z                  # end of string
+}xms;
+
 sub new {
     my $class = shift;
     my %args = @_;
@@ -60,6 +66,7 @@ sub new {
         api_version => 3,
         empty_element_tags=>1,
         strict_comment=>1,
+        attr_encoded=>1,
     );
 
     # Set up HTML::Parser handlers
@@ -226,7 +233,7 @@ sub _img_start {
         $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
          ."title=\"$title\" width=\"$width\" />");
     }
-    else {
+    elsif ($alt =~ $ALT_REGEX) {
        $self->_buffer(" $alt ");
     }
     return;
@@ -394,7 +401,8 @@ URL. They may also have a C<title> attribute.
 =item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
 attributes. The C<src> attribute must match the same regular expression
 as C<href>. If any of these tags are missing the image is replaced by 
-the contents of the alt tag.
+the contents of the alt attribute, so long as it consists only of alphanumeric
+characters, spaces, full stops and commas. Otherwise the image is removed.
 
 =item * All other tags must have no attributes and may only contain text.
 
@@ -458,6 +466,21 @@ This module works by subclassing L<HTML::Parser>.
 =head1 INCOMPATIBILITIES
 
 None reported.
+
+=head1 TODO
+
+=over 
+
+=item * More relaxed treatment of the alt tag would be good. However it is
+easier to go from restrictive behaviour to more relaxed so it will stay like
+it is for now.
+
+=item * Sooner or later a little more flexibility in handling attributes 
+will be required.
+
+=item * I think this module could do with an XS backend for a speed up.
+
+=back
 
 =head1 BUGS AND LIMITATIONS
 
