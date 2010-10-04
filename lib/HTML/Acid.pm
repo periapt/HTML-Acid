@@ -53,14 +53,20 @@ Readonly my $ALT_REGEX => qr{
 sub new {
     my $class = shift;
     my %args = @_;
-    my $tag_hierarchy = $args{tag_hierarchy};
+    my $tag_hierarchy = delete $args{tag_hierarchy};
     if (not $tag_hierarchy) {
         $tag_hierarchy = $class->default_tag_hierarchy;
     }
-    my $url_regex = $args{url_regex};
+    my $url_regex = delete $args{url_regex};
     if (not $url_regex) {
         $url_regex = $URL_REGEX;
     }
+
+    my @tags = sort {
+        # sort like this so that the later depth calcs do not
+        # loop for ever.
+        $tag_hierarchy->{$a} cmp $tag_hierarchy->{$b}
+    } keys %$tag_hierarchy;
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
@@ -74,16 +80,9 @@ sub new {
             end_document=>['_end_document', 'self'],
             start_document=>['_reset', 'self'],
         },
+        ignore_elements=>['script','style'],
+        report_tags=>[@tags, 'br'],
     );
-
-    # Bypass as much as possible
-    $self->ignore_elements('script','style');
-    my @tags = sort {
-        # sort like this so that the later depth calcs do not
-        # loop for ever.
-        $tag_hierarchy->{$a} cmp $tag_hierarchy->{$b}
-    } keys %$tag_hierarchy;
-    $self->report_tags(@tags, 'br');
 
     # calculate depths
     $self->{_acid_depths}->{''} = 0;
@@ -98,8 +97,11 @@ sub new {
             push @tags, $tag;
         }
     }
-    $self->{_acid_hierarchy} = $tag_hierarchy;
+    $self->{_acid_tag_hierarchy} = $tag_hierarchy;
     $self->{_acid_url_regex} = $url_regex;
+    foreach my $arg (keys %args) {
+        $self->{"_acid_$arg"} = $args{$arg};
+    }
 
     bless $self, $class;
     return $self;
@@ -150,7 +152,7 @@ sub _start_process {
     # To call _start_process unhindered
     # the parent tag of $tagname must be the
     # current state.
-    my $required_state = $self->{_acid_hierarchy}->{$tagname};
+    my $required_state = $self->{_acid_tag_hierarchy}->{$tagname};
     if ($required_state ne $actual_state) {
         my $required_depth = $self->{_acid_depths}->{$required_state};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
@@ -201,7 +203,7 @@ sub _end_process {
     }
 
     # State shifts to the parent tag.
-    $self->{_acid_state} = $self->{_acid_hierarchy}->{$tagname};
+    $self->{_acid_state} = $self->{_acid_tag_hierarchy}->{$tagname};
 
     return;
 }
@@ -226,10 +228,9 @@ sub _img_start {
 
     return if not my $alt = $attr->{alt};
     my $src = $self->_url($attr->{src});
-    if ($src and
-        my $height = $attr->{height} and
-        my $width = $attr->{width} and
-        my $title = $attr->{title}) {
+    my $width = $attr->{width} || $self->{_acid_img_width_default};
+    my $height = $attr->{height} || $self->{_acid_img_height_default};
+    if ($src and $height and $width and my $title = $attr->{title}) {
         $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
          ."title=\"$title\" width=\"$width\" />");
     }
@@ -416,7 +417,7 @@ breaks.
 
 =head2 new
 
-This constructor takes two named parameters.
+This constructor takes our optional named parameters.
 
 =over 
 
@@ -432,6 +433,16 @@ This is a hash reference that for each supported tag specifies what
 the containing tag must be. Standards based HTML is not as strict as this.
 This defaults to the value returned by the C<default_tag_hierarchy>
 method.
+
+=item I<img_height_default>
+
+If set this creates a default height value for all images. If not set images
+without height attributes will be rejected.
+
+=item I<img_width_default>
+
+If set this creates a default width value for all images. If not set images
+without width attributes will be rejected.
 
 =back
 

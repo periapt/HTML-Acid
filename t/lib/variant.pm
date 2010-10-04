@@ -27,6 +27,8 @@ sub args {
             em => 'p',
             strong => 'p',
         },
+        img_height_default=>100,
+        img_width_default=>200,
     );
 }
 
