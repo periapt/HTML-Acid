@@ -22,10 +22,12 @@ Test::Spelling::add_stopwords(qw(   AnnoCPAN
                                     detaint
                                     github
                                     HTML
+                                    URL
                                     inline
                                     javascript
                                     RT
                                     XHTML
+                                    XS
                                     XSS));
 Test::Spelling::all_pod_files_spelling_ok();
 

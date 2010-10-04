@@ -1,11 +1,12 @@
 package Data::FormValidator::Filters::HTML::Acid;
 use base qw(Exporter);
-
-@EXPORT = qw(filter_html);
-
 use warnings;
 use strict;
 use Carp;
+use vars qw(@EXPORT);
+
+@EXPORT = qw(filter_html);
+
 use HTML::Acid;
 
 use version; our $VERSION = qv('0.0.1');
@@ -26,7 +27,7 @@ __END__
 
 =head1 NAME
 
-Data::FormValidator::Filters::HTML::Acid - HTML::Acid in DFV framework
+Data::FormValidator::Filters::HTML::Acid - HTML::Acid in a popular data cleansing framework
 
 =head1 VERSION
 

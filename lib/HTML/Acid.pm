@@ -401,8 +401,9 @@ URL. They may also have a C<title> attribute.
 =item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
 attributes. The C<src> attribute must match the same regular expression
 as C<href>. If any of these tags are missing the image is replaced by 
-the contents of the alt attribute, so long as it consists only of alphanumeric
-characters, spaces, full stops and commas. Otherwise the image is removed.
+the contents of the C<alt> attribute, so long as it consists only of
+alphanumeric characters, spaces, full stops and commas. Otherwise the image
+is removed.
 
 =item * All other tags must have no attributes and may only contain text.
 
@@ -467,18 +468,18 @@ This module works by subclassing L<HTML::Parser>.
 
 None reported.
 
-=head1 TODO
+=head1 TO DO
 
 =over 
 
-=item * More relaxed treatment of the alt tag would be good. However it is
+=item * More relaxed treatment of the C<alt> tag would be good. However it is
 easier to go from restrictive behaviour to more relaxed so it will stay like
 it is for now.
 
 =item * Sooner or later a little more flexibility in handling attributes 
 will be required.
 
-=item * I think this module could do with an XS backend for a speed up.
+=item * I think this module could do with an XS back-end for a speed up.
 
 =back
 
