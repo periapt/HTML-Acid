@@ -39,6 +39,7 @@ Readonly my $URL_REGEX => qr{
     /                   # internal URLs only by default
     \w                  # at least one normal character
     [\w\-/]*            # 
+    (?:\.\w{1,5})?      # optional file extension
     (?:\#[\w\-]+)?      # optional anchor
     \z                  # end of string
 }xms;
@@ -66,15 +67,14 @@ sub new {
         api_version => 3,
         empty_element_tags=>1,
         strict_comment=>1,
-        attr_encoded=>1,
+        handlers => {
+            text=>['_text_process', 'self,dtext'],
+            start=>['_start_process', 'self,tagname,attr'],
+            end=>['_end_process', 'self,tagname'],
+            end_document=>['_end_document', 'self'],
+            start_document=>['_reset', 'self'],
+        },
     );
-
-    # Set up HTML::Parser handlers
-    $self->handler(text=>'_text_process', 'self,dtext');
-    $self->handler(start=>'_start_process', 'self,tagname,attr');
-    $self->handler(end=>'_end_process', 'self,tagname');
-    $self->handler(end_document=>'_end_document', 'self');
-    $self->handler(start_document=>'_reset', 'self');
 
     # Bypass as much as possible
     $self->ignore_elements('script','style');
