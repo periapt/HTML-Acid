@@ -5,8 +5,8 @@ use Test::More;
 use Test::Differences;
 use Readonly;
 use File::Basename;
-use Perl6::Slurp;
 use lib qw(t/lib);
+use utils;
 use variant;
 
 eval "require Data::FormValidator";
@@ -26,9 +26,9 @@ Readonly my $PROFILE => {
 };
 
 foreach my $input_file (@INPUT_FILES) {
-    my $input = slurp $input_file;
+    my $input = utils::slurp_encode($input_file);
     my $basename = basename $input_file;
-    my $expected = slurp "t/variant/$basename";
+    my $expected = utils::slurp_encode("t/variant/$basename");
     my $results = Data::FormValidator->check({html=>$input}, $PROFILE);
     if ($results) {
          eq_or_diff($results->valid->{html}, $expected, $basename);

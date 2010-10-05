@@ -73,6 +73,7 @@ sub new {
         api_version => 3,
         empty_element_tags=>1,
         strict_comment=>1,
+        utf8_mode=>1,
         handlers => {
             text=>['_text_process', 'self,dtext'],
             start=>['_start_process', 'self,tagname,attr'],
@@ -124,7 +125,11 @@ sub _text_process {
         $self->_start_process('p', {});
     }
 
-    $self->_buffer($dtext);
+    my $otext = $dtext;
+    if ($self->{_acid_text_manip}) {
+        $otext = &{$self->{_acid_text_manip}}($dtext);
+    }
+    $self->_buffer($otext);
     return;
 }
 
@@ -233,6 +238,11 @@ sub _img_start {
     if ($src and $height and $width and my $title = $attr->{title}) {
         $self->_buffer("<img alt=\"$alt\" height=\"$height\" src=\"$src\" "
          ."title=\"$title\" width=\"$width\" />");
+    }
+    elsif ($self->{_acid_text_manip}) {
+        my $otext = $alt;
+        $otext = &{$self->{_acid_text_manip}}($alt);
+        $self->_buffer(" $otext ");
     }
     elsif ($alt =~ $ALT_REGEX) {
        $self->_buffer(" $alt ");

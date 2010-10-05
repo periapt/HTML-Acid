@@ -1,4 +1,6 @@
 package variant;
+use utf8 qw(decode);
+use HTML::Entities;
 
 sub args {
     return (
@@ -29,6 +31,11 @@ sub args {
         },
         img_height_default=>100,
         img_width_default=>200,
+        text_manip=>sub {
+            my $text = shift;
+            utf8::decode($text);
+            return encode_entities($text);
+        },
     );
 }
 
