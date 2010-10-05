@@ -27,6 +27,7 @@ Test::Spelling::add_stopwords(qw(   AnnoCPAN
                                     javascript
                                     RT
                                     XHTML
+                                    utf8
                                     XS
                                     XSS));
 Test::Spelling::all_pod_files_spelling_ok();

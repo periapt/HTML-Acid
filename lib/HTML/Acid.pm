@@ -457,7 +457,7 @@ without width attributes will be rejected.
 
 =item I<text_manip>
 
-If set this must be subroutine reference. It takes text (and the alt tag from
+If set this must be subroutine reference. It takes text (and the C<alt> attribute from
 invalid images) and what is returned will be used instead.
 
 =back

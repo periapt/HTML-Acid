@@ -6,6 +6,7 @@ lib/HTML/Acid.pm
 lib/HTML/Acid/Buffer.pm
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 META.yml
 README
 t/00.load.t
@@ -48,6 +49,8 @@ t/in/36-missing-anchor-title
 t/in/37-empty-header
 t/in/38-dodgy-alt
 t/in/40-variant
+t/in/41-unicode
+t/lib/utils.pm
 t/lib/variant.pm
 t/manifest.t
 t/out/00-identical
@@ -84,6 +87,7 @@ t/out/36-missing-anchor-title
 t/out/37-empty-header
 t/out/38-dodgy-alt
 t/out/40-variant
+t/out/41-unicode
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
@@ -123,3 +127,4 @@ t/variant/36-missing-anchor-title
 t/variant/37-empty-header
 t/variant/38-dodgy-alt
 t/variant/40-variant
+t/variant/41-unicode

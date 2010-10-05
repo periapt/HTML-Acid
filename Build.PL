@@ -12,6 +12,7 @@ my $builder = Module::Build->new(
         'Perl6::Slurp' => 0,
         'Test::Differences'=>0,
         'Benchmark'=>0,
+        'Test::NoWarnings'=>0,
     },
     requires => {
         'version'    => 0,
