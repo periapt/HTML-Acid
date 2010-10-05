@@ -412,7 +412,8 @@ URL. They may also have a C<title> attribute.
 =item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
 attributes. The C<src> attribute must match the same regular expression
 as C<href>. If any of these tags are missing the image is replaced by 
-the contents of the C<alt> attribute, so long as it consists only of
+the contents of the C<alt> attribute, so long as either the I<text_manip>
+parameter is set or it consists only of
 alphanumeric characters, spaces, full stops and commas. Otherwise the image
 is removed.
 
@@ -427,7 +428,7 @@ breaks.
 
 =head2 new
 
-This constructor takes our optional named parameters.
+This constructor takes a number of optional named parameters.
 
 =over 
 
@@ -453,6 +454,11 @@ without height attributes will be rejected.
 
 If set this creates a default width value for all images. If not set images
 without width attributes will be rejected.
+
+=item I<text_manip>
+
+If set this must be subroutine reference. It takes text (and the alt tag from
+invalid images) and what is returned will be used instead.
 
 =back
 
@@ -483,7 +489,9 @@ HTML::Acid requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
-This module works by subclassing L<HTML::Parser>.
+This module works by subclassing L<HTML::Parser>. Also it assumes that the 
+input will be in utf8 format, that is it sets the I<utf8_mode> flag on the
+L<HTML::Parser> constructor.
 
 =head1 INCOMPATIBILITIES
 
@@ -492,10 +500,6 @@ None reported.
 =head1 TO DO
 
 =over 
-
-=item * More relaxed treatment of the C<alt> tag would be good. However it is
-easier to go from restrictive behaviour to more relaxed so it will stay like
-it is for now.
 
 =item * Sooner or later a little more flexibility in handling attributes 
 will be required.
