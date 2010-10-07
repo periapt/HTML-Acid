@@ -9,7 +9,7 @@ use vars qw(@EXPORT);
 
 use HTML::Acid;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 # Module implementation here
 
@@ -31,7 +31,7 @@ Data::FormValidator::Filters::HTML::Acid - HTML::Acid in a popular data cleansin
 
 =head1 VERSION
 
-This document describes Data::FormValidator::Filters::HTML::Acid version 0.0.1
+This document describes Data::FormValidator::Filters::HTML::Acid version 0.0.2
 
 =head1 SYNOPSIS
 

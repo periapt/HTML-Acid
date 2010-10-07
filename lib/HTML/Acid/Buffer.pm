@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 # Module implementation here
 
@@ -64,11 +64,11 @@ HTML::Acid::Buffer - Temporary buffer for certain elements
 
 =head1 VERSION
 
-This document describes HTML::Acid::Buffer version 0.0.1
+This document describes HTML::Acid::Buffer version 0.0.2
 
 =head1 DESCRIPTION
 
-This class is not used directly.
+This class is not used directly. See L<HTML::Acid>.
 
 =head1 INTERFACE 
 

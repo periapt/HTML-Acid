@@ -1,5 +1,9 @@
 Revision history for HTML-Acid
 
+v0.0.2  Thu 7th October
+       Upped dependency on Test::Simple to fix certain subtest failures
+       Reviewed documentation
+
 v0.0.1  Sun Sep 26 18:01:02 2010
        Initial release.
 

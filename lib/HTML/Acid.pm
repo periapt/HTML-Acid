@@ -8,7 +8,7 @@ use Readonly;
 use HTML::Acid::Buffer;
 use String::Dirify qw(dirify);
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 # Module implementation here
 
@@ -373,7 +373,7 @@ HTML::Acid - Reformat HTML fragment to strict criteria
 
 =head1 VERSION
 
-This document describes HTML::Acid version 0.0.1
+This document describes HTML::Acid version 0.0.2
 
 =head1 SYNOPSIS
 
@@ -412,8 +412,7 @@ URL. They may also have a C<title> attribute.
 =item * Images must have C<src>, C<title>, C<alt>, C<height> and C<width>
 attributes. The C<src> attribute must match the same regular expression
 as C<href>. If any of these tags are missing the image is replaced by 
-the contents of the C<alt> attribute, so long as either the I<text_manip>
-parameter is set or it consists only of
+the contents of the C<alt> attribute, so long as it consists only of
 alphanumeric characters, spaces, full stops and commas. Otherwise the image
 is removed.
 
@@ -519,7 +518,7 @@ L<http://rt.cpan.org>.
 =head1 SEE ALSO
 
 There are many other modules that do something similar. Of those I think
-the most complete is L<HTML::StriptScripts::Parser>. You can also see
+the most complete is L<HTML::StripScripts::Parser>. You can also see
 L<HTML::Declaw>, L<HTML::Clean>, L<HTML::Defang>, L<HTML::Restrict>,
 L<HTML::Scrubber>, L<HTML::Laundary>, L<HTML::Detoxifier>, L<Marpa::HTML>,
 L<HTML::Tidy>. People also often refer to HTML::Santitizer.
