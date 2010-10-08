@@ -20,6 +20,13 @@ my $builder = Module::Build->new(
         'String::Dirify'=>0,
         'Readonly'=>0,
     },
+    meta_merge => {
+        resources => {
+            repository =>
+                'http://github.com/periapt/HTML-Acid/tree',
+        },
+        keywords => [ 'HTML', 'Clean', 'XSS', 'end tags', 'YUI rich text editor' ],
+    },
     create_readme=>1,
     create_makefile_pl => 'traditional',
     add_to_cleanup      => [ 'HTML-Acid-*' ],
