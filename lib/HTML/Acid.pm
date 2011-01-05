@@ -8,7 +8,7 @@ use Readonly;
 use HTML::Acid::Buffer;
 use String::Dirify qw(dirify);
 
-use version; our $VERSION = qv('0.0.2');
+use version; our $VERSION = qv('0.0.3');
 
 # Module implementation here
 

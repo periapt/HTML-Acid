@@ -9,7 +9,7 @@ use vars qw(@EXPORT);
 
 use HTML::Acid;
 
-use version; our $VERSION = qv('0.0.2');
+use version; our $VERSION = qv('0.0.3');
 
 # Module implementation here
 
