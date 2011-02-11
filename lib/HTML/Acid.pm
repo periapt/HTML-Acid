@@ -62,11 +62,41 @@ sub new {
         $url_regex = $URL_REGEX;
     }
 
-    my @tags = sort {
-        # sort like this so that the later depth calcs do not
-        # loop for ever.
-        $tag_hierarchy->{$a} cmp $tag_hierarchy->{$b}
-    } keys %$tag_hierarchy;
+    # Calculate depths and normalize hierarchy
+    my %depths = (''=>0);
+    my %hierarchy = ();
+    my %pending = ();
+    my @tags = ();
+TAG:
+    foreach my $tag (keys %$tag_hierarchy) {
+
+        # Get a list of parents for this tag
+        my @parents     = (ref $tag_hierarchy->{$tag} eq 'ARRAY');
+                        ? @{$tag_hierarchy->{$tag}}
+                        : ( $tag_hierarchy->{$tag} );
+
+        # Get the maximum depth of the parents
+        # If this is not possible dump the problem tag, parent on the 
+        # pending queue
+        my $depth = undef;
+PARENT:
+        foreach my $p (@parents) {
+            if (exists $depths{$p}) {
+                $depth = _max($depth, $depths{$p});
+                $hierarchy{$tag}->{$p} = 1;
+            }
+            else {
+                _push(\%pending, $p, $tag);
+                next TAG;
+            }
+        }
+
+        _pop(\%pending, $tag);
+        $depths{$tag} = $depth+1;
+    }
+
+    $self->{_acid_depths} = \%depth;
+    $self->{_acid_tag_hierarchy} = \%hierarchy;
 
     # Configue HTML::Prser options
     my $self = HTML::Parser->new(
@@ -85,20 +115,6 @@ sub new {
         report_tags=>[@tags, 'br'],
     );
 
-    # calculate depths
-    $self->{_acid_depths}->{''} = 0;
-    while(@tags) {
-        my $tag = shift @tags;
-        my $value = $tag_hierarchy->{$tag};
-        if (exists $self->{_acid_depths}->{$value}) {
-            $self->{_acid_depths}->{$tag}
-                = $self->{_acid_depths}->{$value} + 1;
-        }
-        else {
-            push @tags, $tag;
-        }
-    }
-    $self->{_acid_tag_hierarchy} = $tag_hierarchy;
     $self->{_acid_url_regex} = $url_regex;
     foreach my $arg (keys %args) {
         $self->{"_acid_$arg"} = $args{$arg};
@@ -373,7 +389,7 @@ HTML::Acid - Reformat HTML fragment to strict criteria
 
 =head1 VERSION
 
-This document describes HTML::Acid version 0.0.2
+This document describes HTML::Acid version 0.0.3
 
 =head1 SYNOPSIS
 
@@ -482,6 +498,34 @@ mapping is as follows:
         strong => 'p',
     }
 
+Mapping an element onto the empty string implies that the element appears
+at the top-level of an HTML fragment. So for example
+
+    h3 => '',
+    p => '',
+
+implies that <h3> and <p> can be at the top of the document fragment. Mapping
+onto another element implies that the element must always be contained within
+that element. So
+
+    a => 'p',
+    img => 'p',
+    em => 'p',
+    strong => 'p',
+    
+implies that <a>, <img>, <em> and <strong> must be within a <p> element. It
+is also possible to specify alternatives:
+
+    img => ['p','a'],
+
+which implies that <img> can be within a <p> or an <a>. Note that this
+code does not check for loops. So doing something like
+
+    div => 'span',
+    span => 'div',
+
+will make the code hang.
+
 =head1 CONFIGURATION AND ENVIRONMENT
 
 HTML::Acid requires no configuration files or environment variables.
@@ -499,9 +543,6 @@ None reported.
 =head1 TO DO
 
 =over 
-
-=item * Sooner or later a little more flexibility in handling attributes 
-will be required.
 
 =item * I think this module could do with an XS back-end for a speed up.
 
@@ -529,7 +570,8 @@ Nicholas Bamber  C<< <nicholas@periapt.co.uk> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2010, Nicholas Bamber C<< <nicholas@periapt.co.uk> >>. All rights reserved.
+Copyright (c) 2010-2011, Nicholas Bamber C<< <nicholas@periapt.co.uk> >>.
+All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
