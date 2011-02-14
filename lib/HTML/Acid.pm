@@ -62,29 +62,8 @@ sub new {
         $url_regex = $URL_REGEX;
     }
 
-    # Calculate depths and normalize hierarchy
-    my %depths = (''=>0);
-    my %hierarchy = ();
-    my %pending = ();
-    my @tags = ();
-TAG:
-    foreach my $tag (keys %$tag_hierarchy) {
-        push @tags, $tag;
-
-        if (my $depth = _process_tag(\%depths, \%hierarchy, \%pending, $tag)) {
-            # If we get this far we know the depth of $tag.
-            # So we can go back and look at all the tags 
-            # that were waiting for $tag.
-            my @heldback = _pop_tag(\%pending, $tag);
-        }
-
-
-    }
-
-    $self->{_acid_depths} = \%depth;
-    $self->{_acid_tag_hierarchy} = \%hierarchy;
-
     # Configue HTML::Parser options
+    my @tags = keys %$tag_hierarchy;
     my $self = HTML::Parser->new(
         api_version => 3,
         empty_element_tags=>1,
@@ -101,6 +80,12 @@ TAG:
         report_tags=>[@tags, 'br'],
     );
 
+    # Calculate depths and normalize hierarchy
+    $self->{_acid_depths} = {''=>0};
+    $self->{_acid_tag_hierarchy} = {};
+    my %pending = ();
+    $self->_process_tags(\%pending, $tag_hierarchy, @tags);
+
     $self->{_acid_url_regex} = $url_regex;
     foreach my $arg (keys %args) {
         $self->{"_acid_$arg"} = $args{$arg};
@@ -110,11 +95,16 @@ TAG:
     return $self;
 }
 
-sub _process_tag {
+sub _process_tags {
+    my ($self, $pending, $tag_hierarchy, @tags) = @_;
+
+TAG:
+    foreach my $tag (keys %$tag_hierarchy) {
+
         # Get a list of parents for this tag
-        my @parents     = (ref $tag_hierarchy->{$tag} eq 'ARRAY');
-                        ? @{$tag_hierarchy->{$tag}}
-                        : ( $tag_hierarchy->{$tag} );
+        my @parents  = (ref $tag_hierarchy->{$tag} eq 'ARRAY')
+                     ? @{$tag_hierarchy->{$tag}}
+                     : ( $tag_hierarchy->{$tag} );
 
         # Get the maximum depth of the parents
         # If this is not possible dump the problem tag, parent on the 
@@ -122,17 +112,24 @@ sub _process_tag {
         my $depth = undef;
 PARENT:
         foreach my $p (@parents) {
-            if (exists $depths{$p}) {
-                $depth = _max($depth, $depths{$p});
-                $hierarchy{$tag}->{$p} = 1;
+            if (exists $self->{_acid_depths}->{$p}) {
+                $depth = _max($depth, $self->{_acid_depths}->{$p});
+                $self->{_acid_hierarchy}->{$tag}->{$p} = 1;
             }
             else {
-                _push_tag(\%pending, $p, $tag);
+                _push_tag($pending, $p, $tag);
                 next TAG;
             }
         }
-        $depths{$tag} = $depth+1;
+        $self->{_acid_depths}->{$tag} = $depth+1;
 
+        # If we get this far we know the depth of $tag.
+        # So we can go back and look at all the tags 
+        # that were waiting for $tag.
+        my @heldback = _pop_tag($pending, $tag);
+        $self->_process_tags($pending, $tag_hierarchy, @heldback);
+    }
+    return;
 }
 
 sub _max {
@@ -148,7 +145,7 @@ sub _push_tag {
         push @{$pending->{$parent}}, $tag;
     }
     else {
-        $peding->{$parent} = [$tag];
+        $pending->{$parent} = [$tag];
     }
     return;
 }
@@ -156,7 +153,8 @@ sub _push_tag {
 sub _pop_tag {
     my $pending = shift;
     my $parent = shift;
-    returns @{delete $pending->{$parent}};
+    my $array = delete $pending->{$parent};
+    return @$array;
 }   
 
 sub _text_process {
