@@ -114,7 +114,7 @@ PARENT:
         foreach my $p (@parents) {
             if (exists $self->{_acid_depths}->{$p}) {
                 $depth = _max($depth, $self->{_acid_depths}->{$p});
-                $self->{_acid_hierarchy}->{$tag}->{$p} = 1;
+                $self->{_acid_tag_hierarchy}->{$tag}->{$p} = 1;
             }
             else {
                 _push_tag($pending, $p, $tag);
@@ -169,8 +169,7 @@ sub _text_process {
 
     # To add to the buffer unhindered we must not be in the 
     # start state.
-    my $actual_state = $self->{_acid_state};
-    if ($actual_state eq '' and $text_nontrivial) {
+    if ($self->_get_state eq '' and $text_nontrivial) {
         $self->_start_process('p', {});
     }
 
@@ -187,7 +186,7 @@ sub _start_process {
     my $tagname = shift;
     my $attr = shift;
 
-    my $actual_state = $self->{_acid_state};
+    my $actual_state = $self->_get_state;
 
     #  Two br tags in a row means 'new paragraph'.
     if ($tagname eq 'br') {
@@ -206,16 +205,13 @@ sub _start_process {
     # To call _start_process unhindered
     # the parent tag of $tagname must be the
     # current state.
-    my $required_state = $self->{_acid_tag_hierarchy}->{$tagname};
-    if ($required_state ne $actual_state) {
-        my $required_depth = $self->{_acid_depths}->{$required_state};
+    if ($self->{_acid_hierarchy}->{$tagname}->{$actual_state}) {
+        my $required_depth = $self->{_acid_depths}->{$tagname};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
         if ($actual_depth >= $required_depth) {
             $self->_end_process($actual_state);
         }
-        if ($required_state) {
-            $self->_start_process($required_state, {});
-        }
+        $self->_start_process($tagname, {});
     }
 
     if (exists $START_HANDLERS{$tagname}) {
@@ -228,7 +224,7 @@ sub _start_process {
 
     # State shifts to the current tag.
     # The 'img' end tag does not get called in some cases.
-    $self->{_acid_state} = $tagname if $tagname ne 'img';
+    $self->_push_state($tagname) if $tagname ne 'img';
 
     return;
 }
@@ -240,7 +236,7 @@ sub _end_process {
 
     # To call _start_process unhindered
     # $tagname must be the current state.
-    my $actual_state = $self->{_acid_state};
+    my $actual_state = $self->_get_state;
     if ($tagname ne $actual_state) {
         my $tag_depth = $self->{_acid_depths}->{$tagname};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
@@ -257,7 +253,7 @@ sub _end_process {
     }
 
     # State shifts to the parent tag.
-    $self->{_acid_state} = $self->{_acid_tag_hierarchy}->{$tagname};
+    $self->_pop_state;
 
     return;
 }
@@ -266,8 +262,7 @@ sub _end_document {
     my $self = shift;
 
     # We want to end in the start state.
-    my $actual_state = $self->{_acid_state};
-    if ($actual_state ne '') {
+    if ($self->_get_state ne '') {
         $self->_end_process('p');
         $self->_buffer("\n");
     }
@@ -389,9 +384,26 @@ sub _buffer {
 sub _reset {
     my $self = shift;
     $self->{_acid_buffer} = [HTML::Acid::Buffer->new];
-    $self->{_acid_state} = "";
+    $self->{_acid_state} = [""];
     $self->{_acid_br} = 0;
     return;
+}
+
+sub _get_state {
+    my $self = shift;
+    return $self->{_acid_state}->[0];
+}
+
+sub _push_state {
+    my $self = shift;
+    my $state = shift;
+    unshift @{$self->{_acid_state}}, $state;
+    return;
+}
+
+sub _pop_state {
+    my $self = shift;
+    return shift @{$self->{_acid_state}};
 }
 
 sub burn {
