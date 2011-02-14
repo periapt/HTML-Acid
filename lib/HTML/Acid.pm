@@ -69,36 +69,22 @@ sub new {
     my @tags = ();
 TAG:
     foreach my $tag (keys %$tag_hierarchy) {
+        push @tags, $tag;
 
-        # Get a list of parents for this tag
-        my @parents     = (ref $tag_hierarchy->{$tag} eq 'ARRAY');
-                        ? @{$tag_hierarchy->{$tag}}
-                        : ( $tag_hierarchy->{$tag} );
-
-        # Get the maximum depth of the parents
-        # If this is not possible dump the problem tag, parent on the 
-        # pending queue
-        my $depth = undef;
-PARENT:
-        foreach my $p (@parents) {
-            if (exists $depths{$p}) {
-                $depth = _max($depth, $depths{$p});
-                $hierarchy{$tag}->{$p} = 1;
-            }
-            else {
-                _push(\%pending, $p, $tag);
-                next TAG;
-            }
+        if (my $depth = _process_tag(\%depths, \%hierarchy, \%pending, $tag)) {
+            # If we get this far we know the depth of $tag.
+            # So we can go back and look at all the tags 
+            # that were waiting for $tag.
+            my @heldback = _pop_tag(\%pending, $tag);
         }
 
-        _pop(\%pending, $tag);
-        $depths{$tag} = $depth+1;
+
     }
 
     $self->{_acid_depths} = \%depth;
     $self->{_acid_tag_hierarchy} = \%hierarchy;
 
-    # Configue HTML::Prser options
+    # Configue HTML::Parser options
     my $self = HTML::Parser->new(
         api_version => 3,
         empty_element_tags=>1,
@@ -123,6 +109,55 @@ PARENT:
     bless $self, $class;
     return $self;
 }
+
+sub _process_tag {
+        # Get a list of parents for this tag
+        my @parents     = (ref $tag_hierarchy->{$tag} eq 'ARRAY');
+                        ? @{$tag_hierarchy->{$tag}}
+                        : ( $tag_hierarchy->{$tag} );
+
+        # Get the maximum depth of the parents
+        # If this is not possible dump the problem tag, parent on the 
+        # pending queue
+        my $depth = undef;
+PARENT:
+        foreach my $p (@parents) {
+            if (exists $depths{$p}) {
+                $depth = _max($depth, $depths{$p});
+                $hierarchy{$tag}->{$p} = 1;
+            }
+            else {
+                _push_tag(\%pending, $p, $tag);
+                next TAG;
+            }
+        }
+        $depths{$tag} = $depth+1;
+
+}
+
+sub _max {
+    my ($a, $b) = @_;
+    return (defined $a and $a > $b) ? $a : $b;
+}
+
+sub _push_tag {
+    my $pending = shift;
+    my $parent = shift;
+    my $tag = shift;
+    if ($pending->{$parent}) {
+        push @{$pending->{$parent}}, $tag;
+    }
+    else {
+        $peding->{$parent} = [$tag];
+    }
+    return;
+}
+
+sub _pop_tag {
+    my $pending = shift;
+    my $parent = shift;
+    returns @{delete $pending->{$parent}};
+}   
 
 sub _text_process {
     my $self = shift;
