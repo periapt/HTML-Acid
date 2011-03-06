@@ -80,9 +80,12 @@ sub new {
         report_tags=>[@tags, 'br'],
     );
 
+    bless $self, $class;
+
     # Calculate depths and normalize hierarchy
     $self->{_acid_depths} = {''=>0};
     $self->{_acid_tag_hierarchy} = {};
+    $self->{_acid_preferred_parent} = {};
     my %pending = ();
     $self->_process_tags(\%pending, $tag_hierarchy, @tags);
 
@@ -91,7 +94,6 @@ sub new {
         $self->{"_acid_$arg"} = $args{$arg};
     }
 
-    bless $self, $class;
     return $self;
 }
 
@@ -99,7 +101,7 @@ sub _process_tags {
     my ($self, $pending, $tag_hierarchy, @tags) = @_;
 
 TAG:
-    foreach my $tag (keys %$tag_hierarchy) {
+    foreach my $tag (@tags) {
 
         # Get a list of parents for this tag
         my @parents  = (ref $tag_hierarchy->{$tag} eq 'ARRAY')
@@ -110,10 +112,21 @@ TAG:
         # If this is not possible dump the problem tag, parent on the 
         # pending queue
         my $depth = undef;
+        my $preferred_parent = undef;
 PARENT:
         foreach my $p (@parents) {
             if (exists $self->{_acid_depths}->{$p}) {
-                $depth = _max($depth, $self->{_acid_depths}->{$p});
+                my $p_depth = $self->{_acid_depths}->{$p};
+                if (not defined $depth) {
+                    $depth = $p_depth;
+                    $preferred_parent = $p;
+                }
+                elsif ($p_depth < $depth) {
+                    $preferred_parent = $p;
+                }
+                else {
+                    $depth = $p_depth;
+                }
                 $self->{_acid_tag_hierarchy}->{$tag}->{$p} = 1;
             }
             else {
@@ -122,6 +135,7 @@ PARENT:
             }
         }
         $self->{_acid_depths}->{$tag} = $depth+1;
+        $self->{_acid_preferred_parent}->{$tag} = $preferred_parent;
 
         # If we get this far we know the depth of $tag.
         # So we can go back and look at all the tags 
@@ -130,11 +144,6 @@ PARENT:
         $self->_process_tags($pending, $tag_hierarchy, @heldback);
     }
     return;
-}
-
-sub _max {
-    my ($a, $b) = @_;
-    return (defined $a and $a > $b) ? $a : $b;
 }
 
 sub _push_tag {
@@ -153,6 +162,7 @@ sub _push_tag {
 sub _pop_tag {
     my $pending = shift;
     my $parent = shift;
+    return if not exists $pending->{$parent};
     my $array = delete $pending->{$parent};
     return @$array;
 }   
@@ -206,6 +216,7 @@ sub _start_process {
     # the parent tag of $tagname must be the
     # current state.
     if ($self->{_acid_hierarchy}->{$tagname}->{$actual_state}) {
+        my $required_state = $self->{_acid_preferred_parent}->{$tagname};
         my $required_depth = $self->{_acid_depths}->{$tagname};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
         if ($actual_depth >= $required_depth) {
