@@ -64,7 +64,7 @@ HTML::Acid::Buffer - Temporary buffer for certain elements
 
 =head1 VERSION
 
-This document describes HTML::Acid::Buffer version 0.0.2
+This document describes HTML::Acid::Buffer version 0.0.3
 
 =head1 DESCRIPTION
 

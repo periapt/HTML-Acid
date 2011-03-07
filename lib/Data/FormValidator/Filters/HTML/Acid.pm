@@ -31,7 +31,7 @@ Data::FormValidator::Filters::HTML::Acid - HTML::Acid in a popular data cleansin
 
 =head1 VERSION
 
-This document describes Data::FormValidator::Filters::HTML::Acid version 0.0.2
+This document describes Data::FormValidator::Filters::HTML::Acid version 0.0.3
 
 =head1 SYNOPSIS
 

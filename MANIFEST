@@ -39,6 +39,7 @@ t/in/23-br-strong
 t/in/24-br-header
 t/in/25-br-text
 t/in/26-br-enddoc
+t/in/27-br-nobreak
 t/in/30-emptypara
 t/in/31-header-no-id
 t/in/32-external-img
@@ -77,6 +78,7 @@ t/out/23-br-strong
 t/out/24-br-header
 t/out/25-br-text
 t/out/26-br-enddoc
+t/out/27-br-nobreak
 t/out/30-emptypara
 t/out/31-header-no-id
 t/out/32-external-img
@@ -117,6 +119,7 @@ t/variant/23-br-strong
 t/variant/24-br-header
 t/variant/25-br-text
 t/variant/26-br-enddoc
+t/variant/27-br-nobreak
 t/variant/30-emptypara
 t/variant/31-header-no-id
 t/variant/32-external-img

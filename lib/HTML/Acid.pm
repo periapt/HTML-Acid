@@ -215,14 +215,16 @@ sub _start_process {
     # To call _start_process unhindered
     # the parent tag of $tagname must be the
     # current state.
-    if ($self->{_acid_hierarchy}->{$tagname}->{$actual_state}) {
+    if (not exists $self->{_acid_tag_hierarchy}->{$tagname}->{$actual_state}) {
         my $required_state = $self->{_acid_preferred_parent}->{$tagname};
         my $required_depth = $self->{_acid_depths}->{$tagname};
         my $actual_depth = $self->{_acid_depths}->{$actual_state};
         if ($actual_depth >= $required_depth) {
             $self->_end_process($actual_state);
         }
-        $self->_start_process($tagname, {});
+        if ($required_state ne '') {
+            $self->_start_process($required_state, {});
+        }
     }
 
     if (exists $START_HANDLERS{$tagname}) {
@@ -580,7 +582,7 @@ code does not check for loops. So doing something like
     div => 'span',
     span => 'div',
 
-will make the code hang.
+is unsupported.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
