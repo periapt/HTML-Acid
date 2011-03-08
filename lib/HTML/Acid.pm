@@ -545,6 +545,12 @@ without width attributes will be rejected.
 If set this must be subroutine reference. It takes text (and the C<alt>
 attribute from invalid images) and what is returned will be used instead.
 
+=item I<text_container>
+
+If set this must be subroutine reference. It takes the C<alt> (modified by
+I<text_manip> if present) and returns what would be used in the event of
+an invalid image.
+
 =back
 
 =head2 burn
