@@ -7,7 +7,7 @@ but subsequent <strong>support</strong> will both use this and variant
 files for regression tests. </p><h3 id="play_havoc">Blah</h3><p>This paragraph is intended to include all the
 features permitted in our restricted subset of HTML. Therefore I need to
 include an utterly gratuitous
-<div> &amp;lt;script type=&amp;#39;text/javascript&amp;#39;&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt; </div></p><p>
+</p><div>&amp;lt;script type=&amp;#39;text/javascript&amp;#39;&amp;gt;alert(&amp;#39;XSS&amp;#39;)&amp;lt;/script&amp;gt;</div><p>
 at no extra cost.</p>
 
 <p>This second paragraph is likely to be a bit shorter. However I cannot

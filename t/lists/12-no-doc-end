@@ -7,8 +7,8 @@ but subsequent <strong>support</strong> will both use this and variant
 files for regression tests. This paragraph is intended to include all the
 features permitted in our restricted subset of HTML. Therefore I need to
 include an utterly gratuitous
-<div><img alt="a gratuitous image" height="100000" src="/image/gratuitous" title="a gratuitous image" width="100000" />
-at no extra cost.</div></p>
+</p><img alt="a gratuitous image" height="100000" src="/image/gratuitous" title="a gratuitous image" width="100000" /><p>
+at no extra cost.</p>
 <p>This second paragraph is likely to be a bit shorter. However I cannot
 entirely guarantee that. That is I might have to revise that prediction
 once the paragraph is complete.</p>
