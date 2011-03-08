@@ -8,8 +8,8 @@ files for regression tests. </p><h3 id="play_havoc">Blah</h3><p>This paragraph i
 features permitted in our restricted subset of HTML. Therefore I need to
 include an utterly gratuitous
 </p><div><img alt="a gratuitous image" height="100000" src="/image/gratuitous" title="a gratuitous image" width="100000" />
-at no extra cost.
-</div><p>This second paragraph is likely to be a bit shorter. However I cannot
+at no extra cost.</div>
+<p>This second paragraph is likely to be a bit shorter. However I cannot
 entirely guarantee that. That is I might have to revise that prediction
 once the paragraph is complete.</p>
 <h3 id="test2">The big idea</h3>
