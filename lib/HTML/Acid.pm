@@ -299,12 +299,24 @@ sub _img_start {
     elsif ($self->{_acid_text_manip}) {
         my $otext = $alt;
         $otext = &{$self->{_acid_text_manip}}($alt);
-        $self->_buffer(" $otext ");
+        $self->_buffer($self->_text_container($otext));
     }
     elsif ($alt =~ $ALT_REGEX) {
-       $self->_buffer(" $alt ");
+       $self->_buffer($self->_text_container($alt));
     }
     return;
+}
+
+sub _text_container {
+    my $self = shift;
+    my $text = shift;
+    if ($self->{_acid_text_container}) {
+        $text = &{$self->{_acid_text_container}}($text);
+    }
+    else {
+        $text = " $text ";
+    }
+    return $text;
 }
 
 sub _url {
@@ -530,8 +542,8 @@ without width attributes will be rejected.
 
 =item I<text_manip>
 
-If set this must be subroutine reference. It takes text (and the C<alt> attribute from
-invalid images) and what is returned will be used instead.
+If set this must be subroutine reference. It takes text (and the C<alt>
+attribute from invalid images) and what is returned will be used instead.
 
 =back
 
