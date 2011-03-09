@@ -649,6 +649,9 @@ Nicholas Bamber  C<< <nicholas@periapt.co.uk> >>
 Copyright (c) 2010-2011, Nicholas Bamber C<< <nicholas@periapt.co.uk> >>.
 All rights reserved.
 
+The unordered list in the test files C<(t/*/5*)> is issued under the
+Creative Common Attribution-ShareAlike 3.0 Unported License (wikipedia).
+
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
 
