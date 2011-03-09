@@ -622,6 +622,10 @@ None reported.
 
 =item * I think this module could do with an XS back-end for a speed up.
 
+=item * There is one bit of the code that the test scripts are not currently
+covering. I need some time to think of a reasonably plausible configuration
+that will trigger those cases.
+
 =back
 
 =head1 BUGS AND LIMITATIONS

@@ -19,7 +19,10 @@ Test::Spelling::add_stopwords(qw(   AnnoCPAN
                                     API
                                     Bamber
                                     CPAN
+                                    Unported
+                                    wikipedia
                                     detaint
+                                    ShareAlike
                                     github
                                     HTML
                                     URL

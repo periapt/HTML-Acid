@@ -15,6 +15,7 @@ use utils;
 Readonly my @INPUT_FILES => glob 't/in/??-*';
 Readonly my $MINIMUM_TIME => 10;
 Readonly my $MINIMUM_ITERS => 135*$MINIMUM_TIME;
+Readonly my $REFERENCE_SIZE => -s 't/out/00-identical';
 plan tests => 6+@INPUT_FILES;
 
 my $acid = HTML::Acid->new(div::args());
@@ -37,12 +38,13 @@ foreach my $input_file (@INPUT_FILES) {
         eq_or_diff($actual, $expected, "idempotency - $basename");
 
         if ($ENV{TEST_AUTHOR}) {
+            my $size = -s $input_file;
             my $benchmark = timethis(-$MINIMUM_TIME, sub {
                 my $t_acid = HTML::Acid->new(div::args());
                 my $t_actual = $t_acid->burn($input);
                 croak "failed" if $t_actual ne $expected;
             });
-            ok($benchmark->iters > $MINIMUM_ITERS,
+            ok($benchmark->iters > $MINIMUM_ITERS*$REFERENCE_SIZE/$size,
                 "minimal iterations - $basename");
         }
         else {
